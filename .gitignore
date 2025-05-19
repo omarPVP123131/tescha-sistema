@@ -1,0 +1,59 @@
+# Ignora todo por defecto
+/*
+!.gitignore
+
+# Permite el código fuente
+!/src/
+/src/*
+!/src/main/
+/src/main/*
+!/src/main/java/
+
+# Excepciones específicas para archivos de configuración importantes
+!pom.xml
+!README.md
+
+# Archivos generados por el IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Archivos generados por Maven
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# Archivos generados por el sistema operativo
+Thumbs.db
+.DS_Store
+
+# Archivos de base de datos
+*.db
+*.sqlite
+
+# Archivos de recursos
+/src/main/resources/
+!/src/main/resources/META-INF/
+/src/main/resources/META-INF/*
+!/src/main/resources/META-INF/MANIFEST.MF
+
+# Archivos de imágenes y otros recursos
+*.jpg
+*.png
+*.gif
+*.css
+*.json
+
+# Archivos de salida
+out/
+exports/
+imagenes/
+thumbnails/
+
+# Archivos ejecutables
+*.exe
+*.bat
+*.jar
+*.rar
