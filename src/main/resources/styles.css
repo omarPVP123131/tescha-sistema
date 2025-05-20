@@ -1,0 +1,547 @@
+/* Modern Elegant Styles for Point of Sale System */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Global Styles */
+.root {
+    -fx-font-family: 'Poppins', 'Arial', sans-serif;
+    -fx-background-color: transparent;
+}
+
+/* Main Container */
+.main-container {
+    -fx-background-color: #f8f9fa;
+}
+
+/* Top Bar */
+.top-bar {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-padding: 10px 20px;
+}
+
+.app-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.date-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Search Box */
+.search-box {
+    -fx-background-color: #f5f6fa;
+    -fx-background-radius: 20px;
+    -fx-padding: 5px 15px;
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-prompt-text-fill: #95a5a6;
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 14px;
+    -fx-padding: 5px 0;
+    -fx-pref-width: 200px;
+}
+
+/* User Profile */
+.user-profile {
+    -fx-padding: 0 10px;
+}
+
+.username-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.role-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.badge-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Window Controls */
+.window-control-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 100px;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
+
+.window-control-button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+}
+
+.window-control-button:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la vista de inventario */
+.inventario-view {
+    -fx-padding: 15;
+    -fx-spacing: 10;
+    -fx-background-color: #f5f7fa;
+}
+
+/* Barra superior */
+.busqueda-field {
+    -fx-pref-width: 300;
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.buscar-button, .agregar-button, .categorias-button {
+    -fx-pref-height: 30;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+}
+
+.buscar-button {
+    -fx-background-color: #3498db;
+}
+
+.buscar-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.agregar-button {
+    -fx-background-color: #2ecc71;
+}
+
+.agregar-button:hover {
+    -fx-background-color: #27ae60;
+}
+
+.categorias-button {
+    -fx-background-color: #9b59b6;
+}
+
+.categorias-button:hover {
+    -fx-background-color: #8e44ad;
+}
+
+.combo-categoria {
+    -fx-pref-width: 200;
+    -fx-background-radius: 5;
+}
+
+/* Tabla de equipos */
+.equipos-table {
+    -fx-padding: 5;
+    -fx-background-color: white;
+    -fx-border-color: #d6d6d6;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+.equipos-table .column-header {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-color: #2980b9;
+}
+
+.equipos-table .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.equipos-table .table-row-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.equipos-table .table-row-cell:empty {
+    -fx-background-color: white;
+}
+
+/* Tarjeta de detalle */
+.equipo-card {
+    -fx-background-color: white;
+    -fx-border-color: #d6d6d6;
+    -fx-border-radius: 5;
+    -fx-padding: 15;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+.equipo-titulo {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.info-basica, .info-tecnica, .info-mantenimiento {
+    -fx-padding: 10;
+    -fx-spacing: 5;
+    -fx-background-radius: 5;
+}
+
+.info-basica {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e9ecef;
+}
+
+.info-tecnica {
+    -fx-background-color: #f1f8fe;
+    -fx-border-color: #d1e7fd;
+}
+
+.info-mantenimiento {
+    -fx-background-color: #fff8f1;
+    -fx-border-color: #ffeedd;
+}
+
+.stock-bajo {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}
+
+/* Formulario de equipo */
+.dialog-pane {
+    -fx-pref-width: 700;
+}
+
+.grid-pane {
+    -fx-padding: 15;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}
+
+/* Botón de selección de imagen */
+.button {
+    -fx-cursor: hand;
+}
+
+/* Notificaciones y alertas */
+.alert {
+    -fx-pref-width: 400;
+}
+
+.alert .dialog-pane {
+    -fx-pref-width: 400;
+}
+
+/* Efectos hover */
+.button:hover, .combo-box:hover, .text-field:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+/* Scrollbars */
+.scroll-bar:horizontal, .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 5em;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 0;
+}
+
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 20px;
+}
+
+.sidebar .user-profile-section {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10px;
+    -fx-padding: 15px;
+}
+
+.sidebar-username {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.sidebar-role {
+    -fx-text-fill: #bdc3c7;
+}
+
+.menu-button {
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+}
+
+.active-menu-button {
+    -fx-background-color: #34495e;
+}
+
+/* Estilo para el perfil de la empresa */
+.company-profile {
+    font-size: 14px;
+}
+
+.company-name-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+}
+
+.company-role-label {
+    color: #777;
+    font-size: 12px;
+}
+
+.badge-label {
+    font-size: 10px;
+    color: white;
+}
+
+.company-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.hamburger-icon {
+    -fx-cursor: hand;
+}
+
+/* Menu Buttons */
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 15px;
+    -fx-cursor: hand;
+    -fx-background-radius: 5px;
+}
+
+.menu-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-menu-button {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-border-color: #3498db;
+    -fx-border-width: 0 0 0 3px;
+}
+
+.logout-button {
+    -fx-background-color: rgba(231, 76, 60, 0.2);
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 15px;
+    -fx-cursor: hand;
+    -fx-background-radius: 5px;
+    -fx-margin: 15px;
+}
+
+.logout-button:hover {
+    -fx-background-color: rgba(231, 76, 60, 0.3);
+}
+
+.version-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-size: 12px;
+}
+
+/* Content Container */
+.content-container {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 0;
+}
+
+/* Dashboard */
+.dashboard-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.dashboard-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.dashboard-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12px;
+}
+
+.dashboard-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 6px;
+}
+
+.dashboard-content {
+    -fx-background-color: transparent;
+    -fx-padding: 20px;
+}
+
+/* Welcome Section */
+.welcome-text {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-fill: #2c3e50;
+}
+
+.date-text {
+    -fx-font-size: 14px;
+    -fx-fill: #7f8c8d;
+}
+
+.welcome-section {
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Stat Cards */
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+}
+
+.stat-icon {
+    -fx-background-radius: 8px;
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
+    -fx-max-width: 50px;
+    -fx-max-height: 50px;
+    -fx-alignment: center;
+}
+
+.stat-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.stat-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.stat-change {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.positive-change {
+    -fx-text-fill: #2ecc71;
+}
+
+.negative-change {
+    -fx-text-fill: #e74c3c;
+}
+
+/* Chart Cards */
+.chart-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+}
+
+.chart-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Activity Card */
+.activity-card, .quick-actions-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.activity-icon {
+    -fx-background-radius: 8px;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-alignment: center;
+}
+
+.activity-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.activity-description {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.activity-time {
+    -fx-font-size: 11px;
+    -fx-text-fill: #95a5a6;
+}
+
+/* Quick Action Buttons */
+.quick-action-button {
+    -fx-background-color: white;
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 15px;
+    -fx-cursor: hand;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+}
+
+.quick-action-button:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+/* Placeholder */
+.placeholder-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.placeholder-message {
+    -fx-font-size: 16px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* TextField */
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5px;
+    -fx-padding: 8px;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 1px;
+}

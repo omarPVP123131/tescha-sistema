@@ -1,0 +1,471 @@
+/* Estilos base para la vista de clientes */
+.clients-view {
+    -fx-background-color: #f8f9fa;
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+}
+
+/* Estilos para el ScrollPane que contiene la tabla */
+.table-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+    -fx-padding: 5px;
+}
+
+.table-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Media queries para diferentes tamaños de pantalla */
+@media (max-width: 1000px) {
+    .clients-table .column-header .label {
+        -fx-font-size: 12px;
+        -fx-padding: 5px;
+    }
+
+    .clients-table .table-cell {
+        -fx-font-size: 12px;
+        -fx-padding: 3px 5px;
+    }
+}
+
+@media (max-width: 800px) {
+    .clients-view {
+        -fx-padding: 5px;
+    }
+
+    .form-grid {
+        -fx-hgap: 10px;
+        -fx-vgap: 8px;
+        -fx-padding: 10px;
+    }
+
+    .search-box {
+        -fx-padding: 8px;
+    }
+}
+
+/* Estilo para filas de la tabla que son clickeables */
+.clients-table .table-row-cell {
+    -fx-cursor: hand;
+}
+
+.clients-table .table-row-cell:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.clients-table .table-row-cell:selected:hover {
+    -fx-background-color: #D6EAF8;
+}
+
+/* Estilos para la tabla y su header */
+.clients-table {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-padding: 0;
+    -fx-table-cell-border-color: transparent;
+}
+
+.clients-table .column-header-background {
+    -fx-background-color: #5D6D7E; /* Azul grisáceo oscuro */
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-background-insets: 0 0 0 0;
+    -fx-padding: 5px 0 5px 0;
+}
+
+.clients-table .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.clients-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-padding: 5px 10px;
+}
+
+.clients-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1px 0;
+    -fx-cell-size: 35px;
+}
+
+.clients-table .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.clients-table .table-row-cell:selected {
+    -fx-background-color: #D6EAF8; /* Azul claro para selección */
+    -fx-text-fill: #2C3E50;
+}
+
+.clients-table .table-cell {
+    -fx-padding: 5px 10px;
+    -fx-border-color: transparent;
+    -fx-alignment: CENTER-LEFT;
+}
+
+/* Estilo para el placeholder cuando no hay datos */
+.clients-table .placeholder .label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+}
+
+/* Scrollbar styling */
+.clients-table .scroll-bar:horizontal,
+.clients-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.clients-table .scroll-bar:horizontal .thumb,
+.clients-table .scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 5px;
+}
+
+.clients-table .scroll-bar:horizontal .thumb:hover,
+.clients-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #95a5a6;
+}
+
+/* Celdas de tabla */
+.clients-table .table-cell {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 15px;
+    -fx-alignment: center-left;
+}
+
+/* Indicadores de estado */
+.status-pill {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 10px;
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+}
+
+/* Botones personalizados */
+.clients-button {
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 0, 2, 0, 1);
+    -fx-text-fill: white;
+}
+
+.clients-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 0, 3, 0, 1);
+}
+
+/* Paginación */
+.custom-pagination .pagination-control .button {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+}
+
+.custom-pagination .pagination-control .button:hover {
+    -fx-background-color: #f5f5f5;
+}
+
+.custom-pagination .pagination-control .number-button:selected {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+}
+
+/* Barra de búsqueda */
+.search-box {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, 2);
+    -fx-padding: 16px;
+    -fx-spacing: 12px;
+}
+
+.search-field {
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+}
+
+.search-field:focused {
+    -fx-border-color: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.2), 4, 0, 0, 0);
+}
+
+.filter-combo {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6px;
+    -fx-pref-width: 120px;
+}
+
+/* Campos de formulario */
+.custom-text-field {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+}
+
+.custom-text-field:focused {
+    -fx-border-color: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.2), 4, 0, 0, 0);
+}
+
+.field-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.form-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.table-placeholder {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
+    -fx-padding: 20px;
+}
+
+.status-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #666;
+    -fx-font-style: italic;
+}
+
+.custom-combo-box {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6px;
+}
+
+/* Menú contextual */
+.clients-context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);
+    -fx-padding: 8px 0;
+}
+
+.context-menu-item {
+    -fx-padding: 8px 16px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+.context-menu-item:hover {
+    -fx-background-color: #f5f5f5;
+}
+
+/* Editor avanzado */
+.advanced-editor-grid {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 8, 0, 0, 2);
+    -fx-padding: 20px;
+}
+
+.advanced-editor-title {
+    -fx-font-size: 20px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.advanced-editor-separator {
+    -fx-padding: 5px 0;
+}
+
+.advanced-editor-field {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-pref-width: 250px;
+}
+
+.advanced-editor-field:focused {
+    -fx-border-color: #3498db;
+}
+
+.advanced-editor-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.advanced-editor-combo {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 250px;
+}
+
+.advanced-editor-numeric {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-pref-width: 250px;
+}
+
+.advanced-editor-notes {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+    -fx-pref-width: 250px;
+}
+
+.section-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 0 5px 0;
+}
+
+.section-separator {
+    -fx-padding: 0 0 5px 0;
+}
+
+/* Diálogo de detalles */
+.details-dialog {
+    -fx-background-color: transparent;
+}
+
+.details-content {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 20px;
+}
+
+.details-title {
+    -fx-font-size: 24px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.details-separator {
+    -fx-padding: 10px 0;
+}
+
+.detail-label-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.detail-value-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-wrap-text: true;
+}
+
+.detail-link {
+    -fx-font-size: 14px;
+    -fx-text-fill: #3498db;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.detail-link:hover {
+    -fx-text-fill: #2980b9;
+}
+
+.details-notes {
+    -fx-font-size: 14px;
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+}
+
+.details-close-button {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.details-edit-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Búsqueda avanzada */
+.advanced-search-dialog {
+    -fx-background-color: transparent;
+}
+
+.advanced-search-grid {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 20px;
+}
+
+.advanced-search-field {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-pref-width: 250px;
+}
+
+.search-field-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.search-button {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.cancel-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Títulos y secciones */
+.title-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 0, 1, 0, 1);
+}
+
+.form-separator {
+    -fx-padding: 10px 0;
+}
+
+/* Efectos de transición */
+.fade-transition {
+    -fx-opacity: 1;
+}

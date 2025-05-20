@@ -1,0 +1,27 @@
+.login-container {
+    -fx-background-color: linear-gradient(to bottom, #e0eafc, #cfdef3);
+    -fx-border-radius: 10;
+    -fx-padding: 30;
+    -fx-spacing: 15;
+}
+
+.title {
+    -fx-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.label {
+    -fx-text-fill: #34495e;
+}
+
+.button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.button:hover {
+    -fx-background-color: #2980b9;
+}

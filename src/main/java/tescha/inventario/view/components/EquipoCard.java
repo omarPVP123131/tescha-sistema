@@ -3,6 +3,8 @@ package tescha.inventario.view.components;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.animation.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.paint.Color;
@@ -505,35 +507,54 @@ public class EquipoCard extends BorderPane {
         actionBar.setPadding(new Insets(10, 0, 0, 0));
         actionBar.setAlignment(Pos.CENTER);
 
-        StackPane editarBtnContainer = createButtonWithIcon("Editar", FontAwesomeIcon.EDIT);
-        Button editarBtn = (Button) editarBtnContainer.getChildren().get(0);
-        editarBtn.setOnAction(e -> {
-            e.consume();
-            EquipoForm form = new EquipoForm(controller, equipo);
-            form.showAndWait(); // Use showAndWait() instead of mostrar()
-        });
-        StackPane historialBtnContainer = createButtonWithIcon("Historial", FontAwesomeIcon.HISTORY);
-        Button historialBtn = (Button) historialBtnContainer.getChildren().get(0);
-        historialBtn.setOnAction(e -> tabPane.getSelectionModel().select(3));
+        StackPane editarBtnContainer = createButtonWithIcon(
+                "Editar",
+                FontAwesomeIcon.EDIT,
+                e -> {
+                    e.consume();
+                    EquipoForm form = new EquipoForm(controller, equipo);
+                    form.showAndWait();
+                }
+        );
 
-        StackPane barcodeBtnContainer = createButtonWithIcon("Código", FontAwesomeIcon.BARCODE);
-        Button barcodeBtn = (Button) barcodeBtnContainer.getChildren().get(0);
-        barcodeBtn.setOnAction(e -> mostrarCodigoBarrasCompleto(equipo));
+        StackPane historialBtnContainer = createButtonWithIcon(
+                "Historial",
+                FontAwesomeIcon.HISTORY,
+                e -> tabPane.getSelectionModel().select(3)
+        );
 
-        actionBar.getChildren().addAll(editarBtnContainer, historialBtnContainer, barcodeBtnContainer);
+        StackPane barcodeBtnContainer = createButtonWithIcon(
+                "Código",
+                FontAwesomeIcon.BARCODE,
+                e -> mostrarCodigoBarrasCompleto(equipo)
+        );
+
+        actionBar.getChildren().addAll(
+                editarBtnContainer,
+                historialBtnContainer,
+                barcodeBtnContainer
+        );
         return actionBar;
     }
 
-    private StackPane createButtonWithIcon(String text, FontAwesomeIcon icon) {
+    private StackPane createButtonWithIcon(
+            String text,
+            FontAwesomeIcon icon,
+            EventHandler<ActionEvent> handler
+    ) {
         Button button = new Button(text);
         FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
         iconView.setSize("14px");
         button.setGraphic(iconView);
+        button.setOnAction(handler);
 
-        StackPane container = new StackPane();
-        container.getChildren().add(button);
+        StackPane container = new StackPane(button);
+        container.getStyleClass().add("action-button-container");
+        // padding + cursor de puntero
+        container.setStyle("-fx-padding: 5; -fx-cursor: hand;");
         return container;
     }
+
 
     // Método para inicializar las partículas flotantes
     private void initializeParticleEffect() {
@@ -626,28 +647,30 @@ public class EquipoCard extends BorderPane {
         });
     }
 
-    // Método para implementar efecto ripple en botones
     private void setupButtonRippleEffects() {
         for (Node node : this.lookupAll(".button")) {
             if (node instanceof Button) {
                 Button button = (Button) node;
                 button.setOnMousePressed(e -> {
-                    StackPane container = (StackPane) button.getParent();
-
+                    // Create ripple effect regardless of parent type
                     Circle ripple = new Circle(1);
                     ripple.setCenterX(e.getX());
                     ripple.setCenterY(e.getY());
                     ripple.setFill(Color.web("rgba(255, 255, 255, 0.3)"));
                     ripple.setMouseTransparent(true);
 
+                    // Create a container for the ripple
                     StackPane rippleContainer = new StackPane();
                     rippleContainer.setClip(new javafx.scene.shape.Rectangle(
                             button.getWidth(), button.getHeight()));
                     rippleContainer.getChildren().add(ripple);
                     rippleContainer.setMouseTransparent(true);
 
-                    container.getChildren().add(rippleContainer);
+                    // Add the ripple to the button's parent
+                    Pane parent = (Pane) button.getParent();
+                    parent.getChildren().add(rippleContainer);
 
+                    // Animation
                     ScaleTransition st = new ScaleTransition(Duration.millis(300), ripple);
                     st.setToX(button.getWidth() * 2);
                     st.setToY(button.getHeight() * 2);
@@ -658,7 +681,7 @@ public class EquipoCard extends BorderPane {
                     ft.setInterpolator(Interpolator.EASE_OUT);
 
                     ParallelTransition pt = new ParallelTransition(st, ft);
-                    pt.setOnFinished(event -> container.getChildren().remove(rippleContainer));
+                    pt.setOnFinished(event -> parent.getChildren().remove(rippleContainer));
                     pt.play();
                 });
             }

@@ -1,5 +1,9 @@
 package tescha.inventario.dto;
 
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import javafx.scene.image.Image;
 
 import java.awt.*;
@@ -12,7 +16,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -24,7 +30,7 @@ import javafx.collections.FXCollections;
 
 import javax.imageio.ImageIO;
 
-public class EquipoDTO {
+public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
     private final IntegerProperty id = new SimpleIntegerProperty();
     private final StringProperty nombre = new SimpleStringProperty();
     private final StringProperty categoria = new SimpleStringProperty();
@@ -149,137 +155,58 @@ public class EquipoDTO {
      * Estructura: ID|NOMBRE|CATEGORIA|SERIE (optimizado para lectura y procesamiento)
      */
     public void generarCodigoBarrasDinamico() {
-        // Datos estructurados para fácil escaneo y procesamiento
-        String barcodeData = String.format("%d|%s|%s|%s",
+        String qrData = String.format("%d|%s|%s|%s",
                 getId(),
-                getNombre().substring(0, Math.min(15, getNombre().length())), // Limitar longitud
+                getNombre().substring(0, Math.min(15, getNombre().length())),
                 getCategoria(),
                 getNumeroSerie()
         );
 
         try {
-            Code128Writer barcodeWriter = new Code128Writer();
-            // Ajustar ancho según longitud de datos (mínimo 400px para buena legibilidad)
-            int width = Math.max(400, 100 + barcodeData.length() * 10);
-            BitMatrix bitMatrix = barcodeWriter.encode(barcodeData, BarcodeFormat.CODE_128, width, 150);
+            QRCodeWriter qrWriter = new QRCodeWriter();
+
+            // Parámetros de configuración
+            Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M); // Nivel medio de corrección
+            hints.put(EncodeHintType.MARGIN, 1); // Márgenes mínimos
+
+            // Tamaño fijo para un QR cuadrado (por ejemplo 300x300px)
+            int size = 300;
+            BitMatrix bitMatrix = qrWriter.encode(qrData, BarcodeFormat.QR_CODE, size, size, hints);
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
-            String base64Barcode = Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
-            setQrcode(base64Barcode); // Reutilizamos el campo qrcode para almacenar el barcode
-        } catch (IOException e) {
+            String base64Qr = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+            setQrcode(base64Qr);
+
+        } catch (Exception e) {
             e.printStackTrace();
             setQrcode(null);
         }
     }
 
     /**
-     * Obtiene los datos escaneables del código de barras
-     */
-    public String getDatosEscaneables() {
-        return String.format("%d|%s|%s|%s",
-                getId(), getNombre(), getCategoria(), getNumeroSerie());
-    }
-
-    /**
-     * Genera y guarda la imagen del código de barras con formato profesional
-     */
-    public boolean guardarBarcodeCompleto(String directory) {
-        if (getQrcode() == null || getQrcode().isEmpty()) {
-            generarCodigoBarrasDinamico();
-        }
-
-        try {
-            File dir = new File(directory);
-            if (!dir.exists()) dir.mkdirs();
-
-            String fileName = "COD_" + getId() + "_" + getNombre().replaceAll("[^a-zA-Z0-9]", "_") + ".png";
-            Path path = FileSystems.getDefault().getPath(directory, fileName);
-
-            // Crear imagen con margen y texto
-            BufferedImage barcodeImage = Base64ToBufferedImage(getQrcode());
-            int margin = 20;
-            int textHeight = 50;
-            BufferedImage combined = new BufferedImage(
-                    barcodeImage.getWidth() + margin * 2,
-                    barcodeImage.getHeight() + textHeight + margin * 2,
-                    BufferedImage.TYPE_INT_RGB
-            );
-
-            Graphics2D g = combined.createGraphics();
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, combined.getWidth(), combined.getHeight());
-
-            // Suavizado de texto
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-            // Dibujar código de barras centrado
-            g.drawImage(barcodeImage, margin, margin, null);
-
-            // Texto superior
-            g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 14));
-            String header = getNombre() + " (" + getCategoria() + ")";
-            drawCenteredString(g, header,
-                    combined.getWidth(),
-                    margin / 2);
-
-            // Texto inferior (datos escaneables)
-            g.setFont(new Font("Arial", Font.PLAIN, 12));
-            drawCenteredString(g, "ID: " + getId() + " | Serie: " + getNumeroSerie(),
-                    combined.getWidth(),
-                    barcodeImage.getHeight() + margin + 20);
-
-            // Texto muy pequeño con datos completos (para referencia humana)
-            g.setFont(new Font("Arial", Font.PLAIN, 10));
-            drawCenteredString(g, "Datos escaneables: " + getDatosEscaneables(),
-                    combined.getWidth(),
-                    barcodeImage.getHeight() + margin + 35);
-
-            g.dispose();
-
-            ImageIO.write(combined, "PNG", path.toFile());
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    /**
      * Devuelve un Image de JavaFX con el código de barras, generándolo
      * si aún no existe.
      */
     public Image getBarcodeImage() {
-        // Asegurarnos de que el Base64 esté poblado
         if (getQrcode() == null || getQrcode().isEmpty()) {
             generarCodigoBarrasDinamico();
         }
         try {
             byte[] decoded = Base64.getDecoder().decode(getQrcode());
             ByteArrayInputStream is = new ByteArrayInputStream(decoded);
-            // Cargamos la imagen desde el stream
             return new Image(is);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            // fallback a un placeholder local o remoto:
             return new Image(
                     getClass().getResourceAsStream("/images/placeholder.png")
             );
         }
     }
-    private BufferedImage Base64ToBufferedImage(String base64) throws IOException {
-        byte[] imageData = Base64.getDecoder().decode(base64);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
-        return ImageIO.read(inputStream);
-    }
 
-    private void drawCenteredString(Graphics g, String text, int containerWidth, int y) {
-        FontMetrics fm = g.getFontMetrics();
-        int x = (containerWidth - fm.stringWidth(text)) / 2;
-        g.drawString(text, x, y);
-    }
+
     public boolean isStockBajo() {
         return getCantidad() <= getCantidadMinima();
     }

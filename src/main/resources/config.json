@@ -1,0 +1,16 @@
+{
+  "database": {
+    "path": "data/tescha.db",
+    "create_tables": true
+  },
+  "app": {
+    "title": "TESCHA - Gestión de Inventario",
+    "theme": "light",
+    "language": "es",
+    "backup": {
+      "enabled": true,
+      "interval": "daily",
+      "path": "backups/"
+    }
+  }
+}

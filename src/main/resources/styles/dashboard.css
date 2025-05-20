@@ -1,0 +1,410 @@
+/* dashboard.css - Estilo exclusivo para el Dashboard */
+
+/* Contenedor principal */
+.dashboard-container {
+    -fx-background-color: #f5f7fa;
+}
+
+.dashboard-content {
+    -fx-background-color: #f5f7fa;
+}
+
+.dashboard-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.dashboard-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Estilos de encabezado */
+.dashboard-header {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 1, 0, 0, 1);
+    -fx-padding: 0 0 10 0;
+}
+
+/* Sección superior */
+.top-section {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.welcome-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3498db;
+}
+
+.date-time-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Tarjetas de resumen */
+.summary-cards-container {
+    -fx-spacing: 20px;
+}
+
+.summary-card {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 20px;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-cursor: hand;
+    -fx-border-radius: 15px;
+}
+
+.card-hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0, 0, 5);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.total-card {
+    -fx-background-color: linear-gradient(to bottom right, #34495e, #2c3e50);
+}
+
+.available-card {
+    -fx-background-color: linear-gradient(to bottom right, #27ae60, #2ecc71);
+}
+
+.loaned-card {
+    -fx-background-color: linear-gradient(to bottom right, #e67e22, #f39c12);
+}
+
+.repair-card {
+    -fx-background-color: linear-gradient(to bottom right, #e74c3c, #c0392b);
+}
+
+.card-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 32px;
+}
+
+.card-title {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: normal;
+    -fx-text-fill: white;
+}
+
+.card-value {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.card-description {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* Sección de progreso */
+.progress-section {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.section-title {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.inventory-progress-bar {
+    -fx-pref-height: 10px;
+    -fx-background-radius: 5px;
+    -fx-background-color: #ecf0f1;
+}
+
+.inventory-progress-bar .bar {
+    -fx-background-radius: 5px;
+    -fx-background-color: linear-gradient(to right, #3498db, #2980b9);
+}
+
+.progress-percent-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+    -fx-alignment: center-right;
+}
+
+/* Botones de acción rápida */
+.quick-actions-container {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+}
+
+.action-button {
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-pref-width: 150px;
+    -fx-pref-height: 100px;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.action-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 3);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.action-button-primary {
+    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
+}
+
+.action-button-secondary {
+    -fx-background-color: linear-gradient(to bottom, #27ae60, #2ecc71);
+}
+
+.action-button-warning {
+    -fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);
+}
+
+.action-button-info {
+    -fx-background-color: linear-gradient(to bottom, #9b59b6, #8e44ad);
+}
+
+.action-button-dark {
+    -fx-background-color: linear-gradient(to bottom, #34495e, #2c3e50);
+}
+
+.shortcut-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 10px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-padding: 2px 5px;
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 3px;
+}
+
+/* Alertas y sección de gráficos */
+.alerts-and-charts-section {
+    -fx-spacing: 20px;
+}
+
+.alerts-section {
+    -fx-spacing: 20px;
+}
+
+.alert-card, .charts-card {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.overdue-card, .low-stock-card {
+}
+
+.alert-icon {
+    -fx-icon-color: #e74c3c;
+}
+
+.warning-icon {
+    -fx-icon-color: #f39c12;
+}
+
+.chart-icon {
+    -fx-icon-color: #3498db;
+}
+
+.empty-icon {
+    -fx-icon-color: #95a5a6;
+}
+
+.empty-message {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #95a5a6;
+}
+
+/* Estilo de ScrollPane personalizado */
+.custom-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.custom-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.custom-scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12px;
+}
+
+.custom-scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 6px;
+}
+
+.custom-scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.custom-scroll-pane .scroll-bar .increment-button,
+.custom-scroll-pane .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5 0 5;
+}
+
+.custom-scroll-pane .scroll-bar .increment-arrow,
+.custom-scroll-pane .scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Estilos de préstamos vencidos */
+.overdue-loan-item {
+    -fx-background-color: #fef5f5;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #fadada;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.loan-name {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2c3e50;
+}
+
+.loan-date {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #e74c3c;
+}
+
+.loan-days {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c0392b;
+}
+
+.contact-button {
+    -fx-background-color: #e74c3c;
+    -fx-background-radius: 50%;
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-max-width: 28px;
+    -fx-max-height: 28px;
+    -fx-padding: 6px;
+    -fx-cursor: hand;
+}
+
+.contact-button FontIcon {
+    -fx-icon-color: white;
+}
+
+.contact-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Estilos de artículos con poco stock */
+.low-stock-item {
+    -fx-background-color: #fffbf0;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #fdecc8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.item-name {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #2c3e50;
+}
+
+.quantity-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f39c12;
+}
+
+.restock-button {
+    -fx-background-color: #f39c12;
+    -fx-background-radius: 50%;
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-max-width: 28px;
+    -fx-max-height: 28px;
+    -fx-padding: 6px;
+    -fx-cursor: hand;
+}
+
+.restock-button FontIcon {
+    -fx-icon-color: white;
+}
+
+.restock-button:hover {
+    -fx-background-color: #e67e22;
+}
+
+/* Estilos del gráfico de inventario */
+.inventory-chart {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-padding: 10px;
+}
+
+.chart-available-color {
+    -fx-pie-color: #2ecc71;
+}
+
+.chart-loaned-color {
+    -fx-pie-color: #f39c12;
+}
+
+.chart-repair-color {
+    -fx-pie-color: #e74c3c;
+}
+
+.chart-default-color {
+    -fx-pie-color: #95a5a6;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+}
+
+/* Animaciones */
+.summary-card, .action-button {
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* Estilos de tooltips */
+.tooltip {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 4px;
+}

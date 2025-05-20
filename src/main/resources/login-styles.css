@@ -1,0 +1,254 @@
+/* ===========================================
+   Login Styles para JavaFX
+   =========================================== */
+
+/* Colores base */
+ /* #3f51b5 primary color
+    #757de8 primary light
+    #002984 primary dark
+    #ff4081 secondary
+    #f5f7fa background start
+    #e2e5f1 background end
+    white card background
+    #263238 text primary
+    #546e7a text secondary
+    #b0bec5 text light
+    #4caf50 success
+    #f44336 error
+*/
+
+/* Fuente por defecto */
+* {
+    -fx-font-family: "Poppins", "Segoe UI", sans-serif;
+    -fx-font-smoothing-type: gray;
+}
+
+/* Fondo principal con gradiente y patrón */
+.background-pane {
+    -fx-background-color:
+        linear-gradient(
+            from 0% 0% to 100% 100%,
+            #f5f7fa 0%,
+            #e2e5f1 100%
+        );
+    -fx-background-image: url("patron.jpg");
+    -fx-background-repeat: repeat;
+    -fx-background-size: 20%;
+    -fx-opacity: 0.8;
+}
+
+/* Tarjeta de login (glassmorphism) */
+.login-card {
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: rgba(255,255,255,0.7);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 15, 0.2 , 0 , 6 );
+    -fx-padding: 25px;
+    -fx-spacing: 18px;
+    -fx-alignment: center;
+    -fx-max-width: 380px;
+    -fx-min-height: 560px;
+}
+
+/* Título */
+.login-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #002984;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.15) , 2, 0 , 0 , 1 );
+}
+
+/* Separador */
+.separator {
+    -fx-background-color:
+        linear-gradient(
+            from 0% 50% to 100% 50%,
+            transparent 0%,
+            #757de8 50%,
+            transparent 100%
+        );
+    -fx-pref-height: 1px;
+    -fx-opacity: 0.7;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Botones de ventana */
+.window-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+.window-button:hover {
+    -fx-background-color: rgba(0,0,0,0.05);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* ComboBox de usuario */
+.jfx-combo-box {
+    -fx-background-color: rgba(255,255,255,0.8);
+    -fx-background-radius: 8px;
+    -fx-padding: 8px;
+    -fx-font-size: 14px;
+}
+.jfx-combo-box .arrow {
+    -fx-background-color: #3f51b5;
+}
+.jfx-combo-box:focused {
+    -fx-background-color: rgba(255,255,255,0.95);
+}
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 10, 0 , 0 , 5 );
+}
+.combo-box-popup .list-cell {
+    -fx-padding: 8px 12px;
+    -fx-text-fill: #263238;
+    -fx-font-size: 13px;
+}
+.combo-box-popup .list-cell:filled:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: rgba(63,81,181,0.1);
+    -fx-text-fill: #3f51b5;
+}
+
+/* Campo de contraseña */
+.jfx-password-field {
+    -fx-background-color: rgba(255,255,255,0.8);
+    -fx-background-radius: 8px;
+    -fx-padding: 8px;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #b0bec5;
+}
+.jfx-password-field:focused {
+    -fx-background-color: rgba(255,255,255,0.95);
+}
+
+/* Íconos genéricos */
+.custom-icon {
+    -fx-fill: #3f51b5;
+    -fx-opacity: 0.8;
+}
+
+/* Contenedores de campo */
+.field-container {
+    -fx-spacing: 10px;
+    -fx-padding: 5 10;
+    -fx-alignment: center-left;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(63,81,181,0.2);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.05) , 3, 0 , 0 , 2 );
+    -fx-transition: all 0.3s ease;
+}
+.field-container:hover {
+    -fx-border-color: #757de8;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.1) , 5, 0 , 0 , 3 );
+}
+
+/* Avatar */
+.user-avatar {
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 8, 0 , 0 , 3 );
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-border-color: white;
+    -fx-border-width: 3px;
+}
+.avatar-container {
+    -fx-padding: 10px;
+}
+
+/* Botón de login */
+.login-button {
+    -fx-background-color:
+        linear-gradient(
+            from 0% 50% to 100% 50%,
+            #3f51b5 0%,
+            #002984 100%
+        );
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 24px;
+    -fx-background-radius: 30px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.3) , 8, 0 , 0 , 4 );
+    -fx-transition: all 0.3s ease;
+}
+.login-button:hover {
+    -fx-background-color:
+        linear-gradient(
+            from 0% 50% to 100% 50%,
+            #757de8 0%,
+            #002984 100%
+        );
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.4) , 10, 0 , 0 , 5 );
+    -fx-translate-y: -1px;
+}
+.login-button:pressed {
+    -fx-background-color:
+        linear-gradient(
+            from 0% 50% to 100% 50%,
+            #2e3cb2 0%,
+            #001f6b 100%
+        );
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.3) , 5, 0 , 0 , 2 );
+    -fx-translate-y: 1px;
+}
+.login-button .graphic {
+    -fx-translate-x: -5px;
+}
+
+/* Etiqueta de rol */
+.role-label {
+    -fx-text-fill: #3f51b5;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-padding: 5px 15px;
+    -fx-background-color: rgba(63,81,181,0.1);
+    -fx-background-radius: 20px;
+    -fx-alignment: center;
+    -fx-max-width: 200px;
+}
+
+/* Mensajes */
+.message-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 6px 12px;
+    -fx-background-radius: 4px;
+    -fx-alignment: center;
+    -fx-max-width: 280px;
+    -fx-wrap-text: true;
+}
+.error-label {
+    -fx-text-fill: #f44336;
+    -fx-background-color: rgba(244,67,54,0.1);
+}
+.success-label {
+    -fx-text-fill: #4caf50;
+    -fx-background-color: rgba(76,175,80,0.1);
+}
+
+/* Link de olvido */
+.forgot-password-link {
+    -fx-text-fill: #757de8;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-padding: 5px;
+}
+.forgot-password-link:hover {
+    -fx-text-fill: #3f51b5;
+    -fx-underline: true;
+}

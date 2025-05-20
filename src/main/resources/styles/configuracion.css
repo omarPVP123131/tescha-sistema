@@ -1,0 +1,106 @@
+/* Estilos generales */
+.configuracion-view {
+    -fx-background-color: #f5f5f5;
+    -fx-padding: 10;
+}
+
+/* Estilos para las pestañas */
+.tab-pane {
+    -fx-tab-min-width: 120px;
+}
+
+.tab {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 5 5 0 0;
+    -fx-padding: 5 15 5 15;
+}
+
+.tab:selected {
+    -fx-background-color: #3f51b5;
+    -fx-text-fill: white;
+}
+
+/* Estilos para la tabla de usuarios */
+.table-view {
+    -fx-base: white;
+    -fx-control-inner-background: white;
+    -fx-background-color: white;
+    -fx-table-cell-border-color: transparent;
+    -fx-table-header-border-color: #e0e0e0;
+    -fx-padding: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #3f51b5;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 35;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: transparent;
+    -fx-border-color: #e0e0e0;
+    -fx-border-insets: 0 10 1 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Estilos para los botones */
+.button {
+    -fx-background-color: #3f51b5;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-padding: 5 10 5 10;
+}
+
+.button:hover {
+    -fx-background-color: #303f9f;
+}
+
+.toggle-password-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 2;
+}
+
+/* Estilos para las tarjetas de detalle */
+.usuario-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Estilos para los campos de formulario */
+.text-field, .password-field, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-padding: 5;
+}
+
+/* Estilos para alertas */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #3f51b5;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}

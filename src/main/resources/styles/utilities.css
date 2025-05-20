@@ -1,0 +1,153 @@
+/* settings-styles.css - Estilos exclusivos para la vista de ajustes */
+
+.settings-container {
+    -fx-background-color: #f8f9fa;
+}
+
+/* Estilo para las tarjetas */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 4);
+    -fx-padding: 20px;
+    -fx-spacing: 18px;
+}
+
+/* Estilos para los encabezados */
+.header-label {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.section-label {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+/* Estilos para campos de texto y spinners */
+.text-field, .spinner {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 5px;
+    -fx-border-color: transparent;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-transition: -fx-background-color 0.3s;
+}
+
+.text-field:focused, .spinner:focused {
+    -fx-background-color: #e8f0fe;
+    -fx-border-color: #4285f4;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 5px;
+}
+
+/* Estilo para las etiquetas */
+.setting-label {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-text-fill: #333;
+}
+
+/* Estilos para botones */
+.primary-button {
+    -fx-background-color: #4285f4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 1);
+}
+
+.primary-button:hover {
+    -fx-background-color: #3b78e7;
+}
+
+.primary-button:pressed {
+    -fx-background-color: #3367d6;
+}
+
+.secondary-button {
+    -fx-background-color: #f1f3f4;
+    -fx-text-fill: #202124;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #e8eaed;
+}
+
+.secondary-button:pressed {
+    -fx-background-color: #dadce0;
+}
+
+/* Estilo para los iconos de Material */
+.material-icon {
+    -fx-fill: #5f6368;
+}
+
+.setting-container {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+    -fx-padding: 5px 0;
+}
+
+/* Estilos para tooltips */
+.tooltip {
+    -fx-background-color: #34495e;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 4px;
+}
+
+/* Estilo para separadores */
+.separator {
+    -fx-padding: 5px 0 10px 0;
+}
+
+/* Estilo para la tabla de campos personalizados */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #dadce0;
+    -fx-border-radius: 5px;
+    -fx-padding: 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f1f3f4;
+    -fx-font-weight: bold;
+}
+
+.table-view .column-header-background .label {
+    -fx-text-fill: #5f6368;
+    -fx-font-size: 13px;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f1f3f4 transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e8f0fe;
+    -fx-text-fill: #202124;
+}
+
+/* Animaciones para elementos interactivos */
+.animated-hover:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-transition: all 0.2s ease;
+}

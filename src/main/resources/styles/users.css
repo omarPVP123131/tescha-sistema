@@ -1,0 +1,463 @@
+/* ========== ESTILOS GENERALES ========== */
+.root {
+    -fx-font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    -fx-background-color: #f5f7fa;
+}
+
+/* ========== VISTA LISTA DE USUARIOS ========== */
+.user-list-container {
+    -fx-background-color: transparent;
+}
+
+.header-box {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 2);
+    -fx-padding: 18px 24px;
+    -fx-spacing: 12px;
+}
+
+.view-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.jfx-text-field, .search-field {
+    -fx-background-color: #f5f7fa;
+    -fx-background-radius: 24px;
+    -fx-border-color: transparent;
+    -fx-padding: 10px 15px;
+    -fx-prompt-text-fill: #7f8c8d;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 5, 0, 0, 1);
+}
+
+.jfx-text-field:focused, .search-field:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #a3cfed;
+    -fx-border-width: 1px;
+    -fx-border-radius: 24px;
+}
+
+.clear-button {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-cursor: hand;
+}
+
+.clear-button:hover {
+    -fx-background-color: #859596;
+}
+
+/* Filtros */
+.filter-box {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 2);
+    -fx-padding: 16px 24px;
+    -fx-spacing: 12px;
+    -fx-margin: 0 0 12px 0;
+}
+
+.filter-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+    -fx-padding: 0 5px 0 10px;
+}
+
+.jfx-combo-box, .filter-combo {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-padding: 6px;
+}
+
+.jfx-combo-box:hover, .filter-combo:hover {
+    -fx-border-color: #a3cfed;
+}
+
+.jfx-combo-box:focused, .filter-combo:focused {
+    -fx-border-color: #3498db;
+}
+
+/* Lista de usuarios */
+.users-list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 6px;
+}
+
+.users-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 0;
+}
+
+.user-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 1);
+    -fx-padding: 16px;
+    -fx-min-height: 85px;
+    -fx-cursor: hand;
+    -fx-border-width: 0 0 0 0;
+    -fx-border-color: transparent;
+}
+
+.user-card:hover {
+    -fx-background-color: #fafafa;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 10, 0, 0, 2);
+    -fx-translate-y: -2px;
+}
+
+.inactive-user {
+    -fx-opacity: 0.8;
+    -fx-background-color: linear-gradient(to right, #ffffff, #f5f7fa);
+    -fx-border-color: #95a5a6;
+    -fx-border-width: 0 0 0 5px;
+    -fx-border-radius: 12px 0 0 12px;
+}
+
+.avatar-container {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #a3cfed;
+    -fx-border-width: 2px;
+    -fx-border-radius: 30px;
+    -fx-background-radius: 30px;
+    -fx-min-width: 55px;
+    -fx-min-height: 55px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 1);
+    -fx-cursor: hand;
+    -fx-padding: 2px;
+}
+
+.user-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.user-username {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.user-role {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 12px;
+    -fx-background-color: #ecf0f1;
+}
+
+.admin-role {
+    -fx-text-fill: white;
+    -fx-background-color: #3498db;
+}
+
+.status-active, .status-inactive {
+    -fx-font-size: 11px;
+    -fx-padding: 3px 8px;
+    -fx-background-radius: 12px;
+    -fx-alignment: center;
+}
+
+.status-active {
+    -fx-text-fill: white;
+    -fx-background-color: #2ecc71;
+}
+
+.status-inactive {
+    -fx-text-fill: white;
+    -fx-background-color: #95a5a6;
+}
+
+.user-detail {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+}
+
+/* Botones de acción */
+.action-buttons-container {
+    -fx-spacing: 10px;
+}
+
+.action-button {
+    -fx-background-radius: 20px;
+    -fx-padding: 8px;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-cursor: hand;
+    -fx-content-display: graphic-only;
+}
+
+.button-icon {
+    -fx-icon-size: 16px;
+    -fx-icon-color: white;
+}
+
+.edit-button {
+    -fx-background-color: #3498db;
+}
+
+.edit-button:hover {
+    -fx-background-color: #2980b9;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.4), 8, 0, 0, 0);
+}
+
+.activate-button {
+    -fx-background-color: #2ecc71;
+}
+
+.activate-button:hover {
+    -fx-background-color: #27ae60;
+    -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.4), 8, 0, 0, 0);
+}
+
+.deactivate-button {
+    -fx-background-color: #f39c12;
+}
+
+.deactivate-button:hover {
+    -fx-background-color: #d68910;
+    -fx-effect: dropshadow(gaussian, rgba(243, 156, 18, 0.4), 8, 0, 0, 0);
+}
+
+.delete-button {
+    -fx-background-color: #e74c3c;
+}
+
+.delete-button:hover {
+    -fx-background-color: #ca3e31;
+    -fx-effect: dropshadow(gaussian, rgba(231, 76, 60, 0.4), 8, 0, 0, 0);
+}
+
+/* Badge de administrador */
+.admin-badge {
+    -fx-background-color: #f39c12;
+    -fx-background-radius: 12px;
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 0, 1);
+}
+
+/* Botón flotante de agregar */
+.fab-button {
+    -fx-background-color: #2ecc71;
+    -fx-background-radius: 30px;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-min-width: 60px;
+    -fx-min-height: 60px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-padding: 0 0 5px 0;
+}
+
+.fab-button:hover {
+    -fx-background-color: #27ae60;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 3);
+    -fx-translate-y: -2px;
+}
+
+/* ========== FORMULARIO DE USUARIO ========== */
+.user-form-container {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+}
+
+.user-form {
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0, 0, 5);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.form-header {
+    -fx-background-color: #3498db;
+    -fx-background-radius: 12px 12px 0 0;
+}
+
+.form-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.close-button {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-background-radius: 16px;
+}
+
+.close-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Campos y botones de formulario */
+.form-tabs {
+    -fx-padding: 10px;
+}
+
+/* Estilo de pestañas */
+.form-tabs .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 10px 15px;
+    -fx-text-fill: #333333; /* texto más oscuro para mejor legibilidad */
+    -fx-font-weight: bold;
+}
+
+/* Estilo de pestaña seleccionada */
+.form-tabs .tab:selected {
+    -fx-background-color: #d0eaff; /* azul claro suave */
+    -fx-text-fill: #1a73e8; /* azul accesible y vibrante */
+}
+
+/* Fondo del encabezado de las pestañas */
+.form-tabs .tab-header-background {
+    -fx-background-color: #f2f2f2; /* gris muy claro, sutil */
+}
+
+/* Fondo del contenido del formulario */
+.form-grid {
+    -fx-background-color: #ffffff; /* blanco limpio para buen contraste */
+}
+
+
+.field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.section-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.image-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 20px;
+    -fx-cursor: hand;
+}
+
+.image-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Form Footer */
+.form-footer {
+    -fx-background-color: #f5f7fa;
+    -fx-background-radius: 0 0 12px 12px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.cancel-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #7f8c8d;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+}
+
+.cancel-button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+}
+
+.save-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+}
+
+.save-button:hover {
+    -fx-background-color: #2980b9;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.4), 8, 0, 0, 0);
+}
+
+/* ScrollPane personalizado */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12px;
+}
+
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 12px;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 6px;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #a3a3a3;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5px;
+}
+
+/* Efectos de transición */
+.jfx-button {
+    -fx-transition: all 0.2s ease;
+}
+
+/* Animaciones para vistas vacías */
+.empty-view {
+    -fx-alignment: center;
+    -fx-padding: 30px;
+}
+
+.empty-text {
+    -fx-font-size: 18px;
+    -fx-text-fill: #a5b1c2;
+    -fx-padding: 15px 0 0 0;
+}
+
+/* Tooltip personalizado */
+.tooltip {
+    -fx-background-color: rgba(52, 73, 94, 0.9);
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+}
