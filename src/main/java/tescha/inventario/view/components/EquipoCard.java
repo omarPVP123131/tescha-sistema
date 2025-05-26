@@ -95,27 +95,30 @@ public class EquipoCard extends BorderPane {
         VBox barcodeBox = new VBox(5);
         barcodeBox.setAlignment(Pos.CENTER);
 
-        // Generar código de barras automáticamente
-        if (equipo.getQrcode() == null) {
+        // Generar código QR automáticamente si no existe
+        if (equipo.getQrcode() == null || equipo.getQrcode().isEmpty()) {
             equipo.generarCodigoBarrasDinamico();
         }
 
-        ImageView miniBarcodeView = new ImageView(equipo.getBarcodeImage());
-        miniBarcodeView.setFitWidth(100);
-        miniBarcodeView.setFitHeight(35);
-        miniBarcodeView.setOnMouseClicked(e -> mostrarCodigoBarrasCompleto(equipo));
+        // Vista de imagen QR
+        ImageView qrImageView = new ImageView(equipo.getBarcodeImage());
+        qrImageView.setFitWidth(100);
+        qrImageView.setFitHeight(100);
+        qrImageView.setPreserveRatio(true);
+        qrImageView.setOnMouseClicked(e -> mostrarCodigoBarrasCompleto(equipo)); // Puedes mantener esto si tienes zoom
 
-        Tooltip.install(miniBarcodeView, new Tooltip("Clic para ver código completo"));
+        Tooltip.install(qrImageView, new Tooltip("Clic para ver QR completo"));
 
         // Botón compacto para guardar con icono FontAwesome
         Button saveBtn = new Button();
         FontAwesomeIconView saveIcon = new FontAwesomeIconView(FontAwesomeIcon.SAVE);
         saveIcon.setSize("16px");
         saveBtn.setGraphic(saveIcon);
-        saveBtn.setTooltip(new Tooltip("Guardar código de barras"));
+        saveBtn.setTooltip(new Tooltip("Guardar código QR"));
         saveBtn.setOnAction(ev -> guardarCodigoBarras(equipo));
 
-        barcodeBox.getChildren().addAll(miniBarcodeView, saveBtn);
+
+        barcodeBox.getChildren().addAll(qrImageView, saveBtn);
 
         // Indicador de stock
         ProgressIndicator stockIndicator = new ProgressIndicator(
@@ -155,9 +158,9 @@ public class EquipoCard extends BorderPane {
 
         // Tab 3: Mantenimiento
         ScrollPane mantTab = createMantenimientoTab();
-        Tab mantenimientoTab = new Tab("Mantenimiento");
+        Tab mantenimientoTab = new Tab("Notas");
         mantenimientoTab.setContent(mantTab);
-        mantenimientoTab.setGraphic(createFontAwesomeIcon(FontAwesomeIcon.WRENCH, 16));
+        mantenimientoTab.setGraphic(createFontAwesomeIcon(FontAwesomeIcon.LINUX, 16));
 
         // Tab 4: Historial
         Tab historialTab = new Tab("Historial");
@@ -293,36 +296,7 @@ public class EquipoCard extends BorderPane {
 
         infoTecnica.getChildren().add(gridTecnica);
         especificacionesPane.setContent(infoTecnica);
-
-        // Adquisición
-        TitledPane adquisicionPane = new TitledPane("Información de Adquisición", null);
-        VBox adquisicionBox = new VBox(5);
-        adquisicionBox.setPadding(new Insets(5));
-
-        GridPane gridAdquisicion = new GridPane();
-        gridAdquisicion.setHgap(15);
-        gridAdquisicion.setVgap(5);
-
-        row = 0;
-
-        if (equipo.getFechaAdquisicion() != null) {
-            addGridInfoRowWithIcon(gridAdquisicion, row++, FontAwesomeIcon.CALENDAR, "Fecha adquisición:",
-                    equipo.getFechaAdquisicion().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        }
-
-        addGridInfoRowWithIcon(gridAdquisicion, row++, FontAwesomeIcon.MONEY, "Costo:", String.format("$%.2f", equipo.getCostoAdquisicion()));
-        addGridInfoRowWithIcon(gridAdquisicion, row++, FontAwesomeIcon.TRUCK, "Proveedor:", equipo.getProveedor());
-        addGridInfoRowWithIcon(gridAdquisicion, row++, FontAwesomeIcon.SHIELD, "Garantía:", equipo.getGarantia());
-
-        if (equipo.getVencimientoGarantia() != null) {
-            addGridInfoRowWithIcon(gridAdquisicion, row++, FontAwesomeIcon.CALENDAR_TIMES_ALT, "Venc. garantía:",
-                    equipo.getVencimientoGarantia().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        }
-
-        adquisicionBox.getChildren().add(gridAdquisicion);
-        adquisicionPane.setContent(adquisicionBox);
-
-        tecnicaContent.getChildren().addAll(especificacionesPane, adquisicionPane);
+        tecnicaContent.getChildren().add(especificacionesPane);
 
         ScrollPane scrollPane = new ScrollPane(tecnicaContent);
         scrollPane.setFitToWidth(true);
@@ -354,101 +328,32 @@ public class EquipoCard extends BorderPane {
         mantenimientoContent.setPadding(new Insets(10));
         mantenimientoContent.getStyleClass().add("mantenimiento-tab-content");
 
-        // Programación de mantenimiento
-        TitledPane programacionPane = new TitledPane("Programación de Mantenimiento", null);
-        programacionPane.setExpanded(true);
+        // Notas de mantenimiento
+        if (equipo.getNotas() != null && !equipo.getNotas().isEmpty()) {
+            TitledPane notasPane = new TitledPane("Notas", null);
+            VBox notasBox = new VBox(5);
+            notasBox.setPadding(new Insets(5));
 
-        VBox infoMantenimiento = new VBox(5);
-        infoMantenimiento.setPadding(new Insets(5));
-        infoMantenimiento.getStyleClass().add("info-mantenimiento");
+            FontAwesomeIconView notesIcon = new FontAwesomeIconView(FontAwesomeIcon.STICKY_NOTE);
+            notesIcon.setSize("16px");
+            notasPane.setGraphic(notesIcon);
 
-        addInfoRowWithIcon(infoMantenimiento, FontAwesomeIcon.CALENDAR_CHECK_ALT, "Tipo de mantenimiento:", equipo.getMantenimientoProgramado());
+            TextArea notasArea = new TextArea(equipo.getNotas());
+            notasArea.setEditable(false);
+            notasArea.setWrapText(true);
+            notasArea.setPrefRowCount(4);
 
-        // Fechas importantes con indicadores visuales
-        if (equipo.getUltimoMantenimiento() != null) {
-            HBox ultMantBox = new HBox(10);
-            ultMantBox.setAlignment(Pos.CENTER_LEFT);
-
-            FontAwesomeIconView calendarIcon = new FontAwesomeIconView(FontAwesomeIcon.CALENDAR);
-            calendarIcon.setSize("14px");
-
-            Label ultMantLabel = new Label("Último mantenimiento:");
-            Label ultMantValue = new Label(
-                    equipo.getUltimoMantenimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-
-            Circle statusCircle = new Circle(5);
-            statusCircle.setFill(Color.GREEN);
-
-            ultMantBox.getChildren().addAll(calendarIcon, ultMantLabel, ultMantValue, statusCircle);
-            infoMantenimiento.getChildren().add(ultMantBox);
+            notasBox.getChildren().add(notasArea);
+            notasPane.setContent(notasBox);
+            mantenimientoContent.getChildren().add(notasPane);
         }
-
-        if (equipo.getProximoMantenimiento() != null) {
-            HBox proxMantBox = new HBox(10);
-            proxMantBox.setAlignment(Pos.CENTER_LEFT);
-
-            FontAwesomeIconView calendarIcon = new FontAwesomeIconView(FontAwesomeIcon.CALENDAR);
-            calendarIcon.setSize("14px");
-
-            Label proxMantLabel = new Label("Próximo mantenimiento:");
-            Label proxMantValue = new Label(
-                    equipo.getProximoMantenimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-
-            // Determinar si estamos cerca de la fecha de próximo mantenimiento
-            Circle statusCircle = new Circle(5);
-            statusCircle.setFill(Color.ORANGE); // Por defecto mostrar naranja
-
-            proxMantBox.getChildren().addAll(calendarIcon, proxMantLabel, proxMantValue, statusCircle);
-            infoMantenimiento.getChildren().add(proxMantBox);
-        }
-
-        // Cronograma visual (simplificado)
-        VBox cronograma = new VBox(5);
-        ProgressBar cronogramaBar = new ProgressBar(0.7); // Valor de ejemplo
-        cronogramaBar.setPrefWidth(200);
-
-        HBox timelineLabels = new HBox();
-        timelineLabels.setAlignment(Pos.CENTER);
-        timelineLabels.setPrefWidth(200);
-
-        Label startLabel = new Label("Último");
-        startLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(startLabel, Priority.ALWAYS);
-
-        Label endLabel = new Label("Próximo");
-        endLabel.setMaxWidth(Double.MAX_VALUE);
-        endLabel.setAlignment(Pos.CENTER_RIGHT);
-        HBox.setHgrow(endLabel, Priority.ALWAYS);
-
-        timelineLabels.getChildren().addAll(startLabel, endLabel);
-
-        cronograma.getChildren().addAll(
-                new Label("Cronograma de mantenimiento:"),
-                cronogramaBar,
-                timelineLabels
-        );
-
-        infoMantenimiento.getChildren().add(cronograma);
-        programacionPane.setContent(infoMantenimiento);
-
-        // Historial de mantenimiento reciente
-        TitledPane historialMantPane = new TitledPane("Historial de Mantenimiento Reciente", null);
-        VBox historialMantBox = new VBox(5);
-        historialMantBox.setPadding(new Insets(5));
-
-        // Aquí se podría agregar un ListView con entradas del historial específicas de mantenimiento
-        Label placeholder = new Label("No hay registros de mantenimiento recientes.");
-        historialMantBox.getChildren().add(placeholder);
-
-        historialMantPane.setContent(historialMantBox);
-
-        mantenimientoContent.getChildren().addAll(programacionPane, historialMantPane);
 
         ScrollPane scrollPane = new ScrollPane(mantenimientoContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         return scrollPane;
     }
+
 
     private ScrollPane createHistorialTab() {
         VBox historialContent = new VBox(10);
@@ -703,8 +608,8 @@ public class EquipoCard extends BorderPane {
         }
 
         ImageView barcodeView = new ImageView(equipo.getBarcodeImage());
-        barcodeView.setFitWidth(300);
-        barcodeView.setFitHeight(100);
+        barcodeView.setFitWidth(400);
+        barcodeView.setFitHeight(400);
 
         // Agregar botones de acción con iconos FontAwesome
         HBox buttonBox = new HBox(10);

@@ -56,14 +56,19 @@ public class LoginController {
 
         if (model.validateLogin(username, password)) {
             String role = model.getUsers().get(username).getRole();
-            view.showSuccessMessage("Bienvenido " + username);
+            String lastAccess = model.getUsers().get(username).getLast_access();
 
+            String welcomeMessage = "Bienvenido " + username;
+            if (lastAccess != null) {
+                welcomeMessage += "\nÚltimo acceso: " + lastAccess;
+            }
+
+            view.showSuccessMessage(welcomeMessage);
             openMainWindow(username, role);
         } else {
             view.showErrorMessage("Credenciales incorrectas");
         }
     }
-
     private void openMainWindow(String username, String role) {
         Stage loginStage = (Stage) view.getLoginButton().getScene().getWindow();
         loginStage.close();

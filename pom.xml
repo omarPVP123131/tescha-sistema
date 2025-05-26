@@ -171,6 +171,20 @@
             <artifactId>reactfx</artifactId>
             <version>2.0-M5</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+            <!-- SLF4J API -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.36</version>
+            </dependency>
+
+            <!-- Logback (implementación de SLF4J) -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.11</version>
+            </dependency>
 
         <!-- FontAwesomeFX - For modern icons -->
         <dependency>
@@ -246,6 +260,7 @@
                     <target>24</target>
                 </configuration>
             </plugin>
+            <!-- Empaquetado como JAR ejecutable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -254,6 +269,14 @@
                     <execution>
                         <phase>package</phase>
                         <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <transformers>
+                                <!-- Establece la clase Main del JAR -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>tescha.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

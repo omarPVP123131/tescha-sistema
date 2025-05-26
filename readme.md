@@ -186,6 +186,11 @@ mvn javafx:run \
 
 ```
 
+## Documentacion
+
+### main.java
+
+
 ## Contribuciones
 
 ¡Bienvenido a colaboraciones! Por favor, abre un issue o un pull request.

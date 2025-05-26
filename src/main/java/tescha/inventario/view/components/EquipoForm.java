@@ -40,10 +40,8 @@ public class EquipoForm extends Dialog<EquipoDTO> {
     private Spinner<Integer> cantidadSpinner, minimoSpinner;
     private ComboBox<String> statusCombo;
     private TextField ubicacionField;
-    private TextField serieField, marcaField, modeloField, proveedorField;
-    private TextField garantiaField, mantenimientoField, notasField;
-    private DatePicker fechaAdqPicker, vencGarantiaPicker, ultimoMantPicker, proximoMantPicker;
-    private Spinner<Double> costoSpinner;
+    private TextField serieField, marcaField, modeloField, notasField;
+
 
     // Imagen
     private String rutaImagen = null;
@@ -254,24 +252,10 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         panelSuperior.setLeft(gridIzquierdo);
         panelSuperior.setRight(panelImagen);
 
-        // Notas - área de texto grande en la parte inferior
-        VBox notasBox = new VBox(5);
-        Label notasLabel = new Label("Notas adicionales:");
-
-        TextArea notasArea = new TextArea();
-        notasArea.setPromptText("Información adicional sobre el equipo...");
-        notasArea.setPrefRowCount(4);
-        notasField = new TextField(); // Mantenemos el TextField original como hidden para compatibilidad
-        notasField.visibleProperty().set(false);
-
-        // Binding bidireccional
-        notasArea.textProperty().bindBidirectional(notasField.textProperty());
-
-        notasBox.getChildren().addAll(notasLabel, notasArea);
-        VBox.setVgrow(notasArea, Priority.ALWAYS);
+;
 
         // Añadir todo a la sección
-        seccion.getChildren().addAll(panelSuperior, new Separator(), notasBox);
+        seccion.getChildren().addAll(panelSuperior, new Separator());
 
         return seccion;
     }
@@ -302,15 +286,7 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         serieField.setPromptText("Número de serie");
 
 
-        costoSpinner = new Spinner<>(0.0, Double.MAX_VALUE, 0.0, 50.0);
-        costoSpinner.setEditable(true);
-        costoSpinner.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
-            try {
-                Double.parseDouble(newValue);
-            } catch (NumberFormatException e) {
-                Platform.runLater(() -> costoSpinner.getEditor().setText(oldValue));
-            }
-        });
+
 
         int row = 0;
         grid.add(new Label("Marca:"), 0, row);
@@ -322,34 +298,10 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         grid.add(new Label("Número de serie:"), 0, row);
         grid.add(serieField, 1, row++);
 
-        grid.add(new Label("Costo:"), 0, row);
-        grid.add(costoSpinner, 1, row++);
 
-        // Segunda columna
-        proveedorField = new TextField();
-        proveedorField.setPromptText("Proveedor");
 
-        fechaAdqPicker = new DatePicker(LocalDate.now());
-        fechaAdqPicker.setPromptText("Fecha de adquisición");
 
-        garantiaField = new TextField();
-        garantiaField.setPromptText("Datos de garantía");
 
-        vencGarantiaPicker = new DatePicker();
-        vencGarantiaPicker.setPromptText("Vencimiento de garantía");
-
-        row = 0;
-        grid.add(new Label("Proveedor:"), 2, row);
-        grid.add(proveedorField, 3, row++);
-
-        grid.add(new Label("Fecha adquisición:"), 2, row);
-        grid.add(fechaAdqPicker, 3, row++);
-
-        grid.add(new Label("Garantía:"), 2, row);
-        grid.add(garantiaField, 3, row++);
-
-        grid.add(new Label("Venc. garantía:"), 2, row);
-        grid.add(vencGarantiaPicker, 3, row++);
 
         // Configurar columnas
         ColumnConstraints col1 = new ColumnConstraints();
@@ -380,7 +332,7 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         seccion.setPadding(new Insets(20));
 
         // Título de sección
-        Text titulo = new Text("Información de Mantenimiento");
+        Text titulo = new Text("Notas adicionales");
         titulo.setFont(Font.font("System", FontWeight.BOLD, 16));
         seccion.getChildren().add(titulo);
 
@@ -389,76 +341,34 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         grid.setVgap(12);
         grid.setHgap(15);
 
-        mantenimientoField = new TextField();
-        mantenimientoField.setPromptText("Detalles del mantenimiento requerido");
+        // Notas - área de texto grande en la parte inferior
+        VBox notasBox = new VBox(5);
+        Label notasLabel = new Label("Notas adicionales:");
 
-        ultimoMantPicker = new DatePicker();
-        ultimoMantPicker.setPromptText("Fecha del último mantenimiento");
+        TextArea notasArea = new TextArea();
+        notasArea.setPromptText("Información adicional sobre el equipo...");
+        notasArea.setPrefRowCount(4);
+        notasField = new TextField(); // Mantenemos el TextField original como hidden para compatibilidad
+        notasField.setPromptText("Notas");
 
-        proximoMantPicker = new DatePicker();
-        proximoMantPicker.setPromptText("Fecha del próximo mantenimiento");
+        notasField.visibleProperty().set(true);
 
-        int row = 0;
-        grid.add(new Label("Mantenimiento programado:"), 0, row);
-        grid.add(mantenimientoField, 1, row++, 3, 1);
+        // Binding bidireccional
+        notasArea.textProperty().bindBidirectional(notasField.textProperty());
 
-        grid.add(new Label("Último mantenimiento:"), 0, row);
-        grid.add(ultimoMantPicker, 1, row);
+        notasBox.getChildren().addAll(notasLabel, notasArea);
+        VBox.setVgrow(notasArea, Priority.ALWAYS);
 
-        grid.add(new Label("Próximo mantenimiento:"), 2, row);
-        grid.add(proximoMantPicker, 3, row++);
 
-        // Configurar columnas
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setHgrow(Priority.NEVER);
-        col1.setMinWidth(150);
-
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
-        col2.setFillWidth(true);
-
-        ColumnConstraints col3 = new ColumnConstraints();
-        col3.setHgrow(Priority.NEVER);
-        col3.setMinWidth(150);
-
-        ColumnConstraints col4 = new ColumnConstraints();
-        col4.setHgrow(Priority.ALWAYS);
-        col4.setFillWidth(true);
-
-        grid.getColumnConstraints().addAll(col1, col2, col3, col4);
-
-        // Sección de historial de mantenimiento (simulada)
-        TitledPane historialPane = new TitledPane();
-        historialPane.setText("Historial de Mantenimiento");
 
         ListView<String> historialList = new ListView<>();
         historialList.setPlaceholder(new Label("No hay registros de mantenimiento"));
 
-        if (equipoOriginal != null && equipoOriginal.getUltimoMantenimiento() != null) {
-            historialList.getItems().add(
-                    String.format("%s - Mantenimiento regular realizado",
-                            equipoOriginal.getUltimoMantenimiento().toString()));
-        }
 
-        historialPane.setContent(historialList);
-        historialPane.setExpanded(false);
+        seccion.getChildren().addAll(grid, notasBox);
 
-        seccion.getChildren().addAll(grid, historialPane);
 
-        // Configurar cálculo automático de fecha de próximo mantenimiento
-        Button btnCalcularProximo = new Button("Calcular próximo mantenimiento");
-        btnCalcularProximo.getStyleClass().add("btn-secondary");
-        btnCalcularProximo.setOnAction(e -> {
-            if (ultimoMantPicker.getValue() != null) {
-                // Asumimos que el mantenimiento es cada 3 meses, pero se podría hacer configurable
-                proximoMantPicker.setValue(ultimoMantPicker.getValue().plusMonths(3));
-                mostrarNotificacion("Fecha calculada en base al último mantenimiento", false);
-            } else {
-                mostrarNotificacion("Defina primero la fecha del último mantenimiento", true);
-            }
-        });
 
-        seccion.getChildren().add(btnCalcularProximo);
 
         return seccion;
     }
@@ -554,30 +464,11 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         marcaField.setText(equipoOriginal.getMarca());
         modeloField.setText(equipoOriginal.getModelo());
 
-        if (equipoOriginal.getFechaAdquisicion() != null) {
-            fechaAdqPicker.setValue(equipoOriginal.getFechaAdquisicion());
-        }
-
-        costoSpinner.getValueFactory().setValue(equipoOriginal.getCostoAdquisicion());
-        proveedorField.setText(equipoOriginal.getProveedor());
-        garantiaField.setText(equipoOriginal.getGarantia());
-
-        if (equipoOriginal.getVencimientoGarantia() != null) {
-            vencGarantiaPicker.setValue(equipoOriginal.getVencimientoGarantia());
-        }
-
-        mantenimientoField.setText(equipoOriginal.getMantenimientoProgramado());
-
-        if (equipoOriginal.getUltimoMantenimiento() != null) {
-            ultimoMantPicker.setValue(equipoOriginal.getUltimoMantenimiento());
-        }
-
-        if (equipoOriginal.getProximoMantenimiento() != null) {
-            proximoMantPicker.setValue(equipoOriginal.getProximoMantenimiento());
-        }
-
         notasField.setText(equipoOriginal.getNotas());
-
+        // También actualiza el TextArea si es necesario
+        if (equipoOriginal.getNotas() != null) {
+            notasField.setText(equipoOriginal.getNotas());
+        }
         // Cargar imagen si existe
         if (equipoOriginal.getImagen() != null && !equipoOriginal.getImagen().isEmpty()) {
             try {
@@ -671,15 +562,6 @@ public class EquipoForm extends Dialog<EquipoDTO> {
         equipo.setNumeroSerie(serieField.getText());
         equipo.setMarca(marcaField.getText());
         equipo.setModelo(modeloField.getText());
-        equipo.setFechaAdquisicion(fechaAdqPicker.getValue());
-        equipo.setCostoAdquisicion(costoSpinner.getValue());
-        equipo.setProveedor(proveedorField.getText());
-        equipo.setGarantia(garantiaField.getText());
-        equipo.setVencimientoGarantia(vencGarantiaPicker.getValue());
-        equipo.setMantenimientoProgramado(mantenimientoField.getText());
-        equipo.setUltimoMantenimiento(ultimoMantPicker.getValue());
-        equipo.setProximoMantenimiento(proximoMantPicker.getValue());
-        equipo.setNotas(notasField.getText());
         equipo.setNotas(notasField.getText());
         equipo.setImagen(rutaImagenFinal);
 

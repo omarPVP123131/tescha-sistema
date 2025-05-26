@@ -16,6 +16,7 @@ public interface InventarioDAO {
     List<EquipoDTO> obtenerEquiposConStockBajo();
     void registrarMovimiento(int equipoId, String tipo, String descripcion, String usuario);
     List<String> obtenerHistorialEquipo(int equipoId);
+    List<String> obtenerHistorialReciente(int limit);
 
     // Operaciones CRUD para categorías
     List<CategoriaDTO> obtenerTodasCategorias();

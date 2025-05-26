@@ -1,0 +1,7 @@
+{
+  "database" : "tescha.db",
+  "logoPath" : "/logo.png",
+  "enableNotifications" : true,
+  "theme" : "light",
+  "autoLogin" : false
+}

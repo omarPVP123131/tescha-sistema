@@ -3,14 +3,13 @@ package tescha.MainWindow.view;
 import com.jfoenix.controls.*;
 import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import animatefx.animation.*;
+import javafx.animation.*;
+import javafx.scene.chart.PieChart;
 import org.kordamp.ikonli.fontawesome5.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 import com.jfoenix.effects.JFXDepthManager;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -34,9 +33,15 @@ import tescha.configuracion.dao.ConfiguracionSQLiteDAO;
 import tescha.configuracion.service.ConfiguracionService;
 import tescha.configuracion.view.ConfiguracionView;
 import tescha.database.DatabaseManager;
+import tescha.departamento.controller.DepartamentoController;
+import tescha.departamento.dao.DepartamentoDAO;
+import tescha.departamento.dao.DepartamentoSQLiteDAO;
+import tescha.departamento.service.DepartamentoService;
+import tescha.departamento.view.DepartamentoView;
 import tescha.inventario.controller.InventarioController;
 import tescha.inventario.dao.InventarioDAO;
 import tescha.inventario.dao.InventarioSQLiteDAO;
+import tescha.inventario.dto.EquipoDTO;
 import tescha.inventario.service.InventarioService;
 import tescha.inventario.view.InventarioView;
 import tescha.users.controller.UserController;
@@ -47,7 +52,11 @@ import tescha.users.view.UserListView;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MainWindow {
     private Stage stage;
@@ -63,21 +72,22 @@ public class MainWindow {
     private VBox userProfileSection;
 
     // Paleta de colores moderna
-    private final String PRIMARY_COLOR    = "#1976D2";  // Azul más oscuro
-    private final String SECONDARY_COLOR  = "#E91E63";  // Rosa vibrante
-    private final String BACKGROUND_COLOR = "#ECEFF1";  // Gris muy suave
-    private final String CARD_COLOR       = "#FFFFFF";  // Blanco puro
-    private final String TEXT_PRIMARY     = "#212121";  // Casi negro
-    private final String TEXT_SECONDARY   = "#455A64";  // Gris oscuro
-    private final String SUCCESS_COLOR    = "#388E3C";  // Verde oscuro
-    private final String WARNING_COLOR    = "#F57C00";  // Naranja intenso
-    private final String ERROR_COLOR      = "#D32F2F";  // Rojo fuerte
-    private final String INFO_COLOR       = "#0288D1";  // Azul intenso
-    private final String CARD_COLOR_DARKER       = "#212121";  // Azul intenso
+    private final String PRIMARY_COLOR    = "#1976D2";
+    private final String SECONDARY_COLOR  = "#E91E63";
+    private final String BACKGROUND_COLOR = "#ECEFF1";
+    private final String CARD_COLOR       = "#FFFFFF";
+    private final String TEXT_PRIMARY     = "#212121";
+    private final String TEXT_SECONDARY   = "#455A64";
+    private final String SUCCESS_COLOR    = "#388E3C";
+    private final String WARNING_COLOR    = "#F57C00";
+    private final String ERROR_COLOR      = "#D32F2F";
+    private final String INFO_COLOR       = "#0288D1";
+    private final String CARD_COLOR_DARKER = "#212121";
 
     // Botones del menú
     private JFXButton dashboardButton;
     private JFXButton inventoryButton;
+    private JFXButton departamentosButton;
     private JFXButton loansButton;
     private JFXButton usersButton;
     private JFXButton reportsButton;
@@ -92,11 +102,11 @@ public class MainWindow {
         stage.initStyle(StageStyle.TRANSPARENT);
         setupUI();
     }
-
     private void setupUI() {
         root = new BorderPane();
         root.getStyleClass().add("main-container");
-        root.setStyle("-fx-background-color: " + BACKGROUND_COLOR + ";");
+        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef, #dee2e6);");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
 
         // Barra superior con efecto de elevación
         HBox topBar = createTopBar();
@@ -118,6 +128,9 @@ public class MainWindow {
 
         root.setCenter(contentArea);
 
+        // Barra de estado inferior
+        root.setBottom(createStatusBar());
+
         Scene scene = new Scene(root, 1280, 800);
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
 
@@ -129,8 +142,28 @@ public class MainWindow {
 
         stage.setScene(scene);
         stage.setTitle("Sistema de Gestión de Inventario y Préstamos - " + username);
+
+        // Configurar actualización automática
+        setupAutoRefresh();
     }
 
+
+    private HBox createStatusBar() {
+        HBox statusBar = new HBox(10);
+        statusBar.setPadding(new Insets(5, 15, 5, 15));
+        statusBar.setStyle("-fx-background-color: " + CARD_COLOR + ";");
+
+        Label dbStatus = new Label("DB: Conectado");
+        dbStatus.setGraphic(new FontIcon(FontAwesomeSolid.DATABASE));
+
+        Label lastUpdate = new Label("Actualizado: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        statusBar.getChildren().addAll(dbStatus, spacer, lastUpdate);
+        return statusBar;
+    }
     private HBox createTopBar() {
         // Ícono de hamburguesa con animación mejorada
         JFXHamburger hamburger = new JFXHamburger();
@@ -416,6 +449,7 @@ public class MainWindow {
         inventoryButton = createMenuButton("Inventario", new FontIcon(FontAwesomeSolid.BOX));
         loansButton = createMenuButton("Préstamos", new FontIcon(FontAwesomeSolid.HAND_HOLDING));
         usersButton = createMenuButton("Usuarios", new FontIcon(FontAwesomeSolid.USERS));
+        departamentosButton = createMenuButton("Departamentos", new FontIcon(FontAwesomeSolid.BUILDING));
         reportsButton = createMenuButton("Reportes", new FontIcon(FontAwesomeSolid.CHART_BAR));
         settingsButton = createMenuButton("Configuración", new FontIcon(FontAwesomeSolid.COG));
         helpButton = createMenuButton("Ayuda", new FontIcon(FontAwesomeSolid.QUESTION_CIRCLE));
@@ -449,6 +483,7 @@ public class MainWindow {
             showPlaceholder("Módulo de Préstamos");
         });
 
+
         // Configurar visibilidad según el rol
         if (!"admin".equalsIgnoreCase(role)) {
             // Ocultar módulos sensibles para empleados
@@ -456,6 +491,8 @@ public class MainWindow {
             usersButton.setManaged(false);
             reportsButton.setVisible(false);
             reportsButton.setManaged(false);
+            departamentosButton.setManaged(false);
+            departamentosButton.setVisible(false);
             settingsButton.setVisible(false);
             settingsButton.setManaged(false);
         } else {
@@ -478,6 +515,20 @@ public class MainWindow {
                     AlertUtils.showError("Error", "No se pudo cargar el módulo de usuarios");
                 }
             }));
+            departamentosButton.setOnAction(e -> {
+                setActiveButton(departamentosButton);
+                try {
+                    Connection connection = DatabaseManager.connect();
+                    DepartamentoDAO departamentoDAO = new DepartamentoSQLiteDAO(connection);
+                    DepartamentoService departamentoService = new DepartamentoService(departamentoDAO);
+                    DepartamentoController departamentoController = new DepartamentoController(departamentoService);
+                    DepartamentoView departamentoView = new DepartamentoView(departamentoController);
+
+                    setContent(departamentoView.getView());
+                } catch (SQLException ex) {
+                    System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
+                }
+            });
 
             reportsButton.setOnAction(e -> checkAdminAccess(() -> {
                 setActiveButton(reportsButton);
@@ -531,6 +582,7 @@ public class MainWindow {
         if ("admin".equalsIgnoreCase(role)) {
             menuButtons.getChildren().addAll(
                     usersButton,
+                    departamentosButton,
                     reportsButton,
                     settingsButton
             );
@@ -641,11 +693,21 @@ public class MainWindow {
 
         return button;
     }
+    private void setupAutoRefresh() {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.minutes(5), e -> refreshData()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
 
+    private void refreshData() {
+        if (dashboardButton.getStyleClass().contains("active-menu-button")) {
+            showDashboard(); // Recarga los datos
+        }
+    }
     private void setActiveButton(JFXButton activeButton) {
         // Remover clase activa y restaurar color de icono en todos los botones
         for (JFXButton button : new JFXButton[]{dashboardButton, inventoryButton, loansButton,
-                usersButton, reportsButton, settingsButton, helpButton}) {
+                usersButton,departamentosButton, reportsButton, settingsButton, helpButton}) {
             if (button != null) {
                 button.getStyleClass().remove("active-menu-button");
                 button.setStyle("-fx-background-color: transparent;");
@@ -695,10 +757,14 @@ public class MainWindow {
         // Estadísticas rápidas con diseño moderno
         HBox quickStats = createQuickStats();
 
+        // Gráficos estadísticos
+        Node inventoryChart = createInventoryChart();
+
         // Añadir contenido al dashboard
         dashboardContent.getChildren().addAll(
                 welcomeBox,
                 quickStats,
+                inventoryChart,
                 createRecentActivitiesSection()
         );
 
@@ -709,34 +775,63 @@ public class MainWindow {
         new FadeInUp(dashboardContent).play();
     }
 
+
     private HBox createQuickStats() {
-        // Tarjetas de estadísticas con diseño mejorado
-        VBox inventoryStats = createStatCard("Items en Inventario", "0", INFO_COLOR, new FontIcon(FontAwesomeSolid.BOXES));
-        VBox activeLoans = createStatCard("Préstamos Activos", "0", SUCCESS_COLOR, new FontIcon(FontAwesomeSolid.CLIPBOARD_CHECK));
-        VBox overdueLoans = createStatCard("Préstamos Vencidos", "0", ERROR_COLOR, new FontIcon(FontAwesomeSolid.EXCLAMATION_TRIANGLE));
-        VBox usersCount = createStatCard("Usuarios Registrados", "0", PRIMARY_COLOR, new FontIcon(FontAwesomeSolid.USER_FRIENDS));
+        try (Connection conn = DatabaseManager.connect()) {
+            InventarioDAO inventarioDAO = new InventarioSQLiteDAO(conn);
+            UserDAO userDAO = new UserSQLiteDAO(conn);
 
-        HBox statsContainer = new HBox(20, inventoryStats, activeLoans, overdueLoans, usersCount);
-        statsContainer.setAlignment(Pos.CENTER);
+            int totalItems = inventarioDAO.obtenerTodosLosEquipos().size();
+            int activeLoans = 0; // Implementar en PrestamoDAO
+            int overdueLoans = 0; // Implementar en PrestamoDAO
+            int totalUsers = userDAO.getAllUsers().size();
 
-        // Hacer que las tarjetas se expandan uniformemente
-        HBox.setHgrow(inventoryStats, Priority.ALWAYS);
-        HBox.setHgrow(activeLoans, Priority.ALWAYS);
-        HBox.setHgrow(overdueLoans, Priority.ALWAYS);
-        HBox.setHgrow(usersCount, Priority.ALWAYS);
+            VBox inventoryStats = createStatCard(
+                    "Items en Inventario",
+                    String.valueOf(totalItems),
+                    INFO_COLOR,
+                    new FontIcon(FontAwesomeSolid.BOXES),
+                    () -> inventoryButton.fire()
+            );
 
-        return statsContainer;
+            VBox activeLoansCard = createStatCard(
+                    "Préstamos Activos",
+                    String.valueOf(activeLoans),
+                    SUCCESS_COLOR,
+                    new FontIcon(FontAwesomeSolid.CLIPBOARD_CHECK),
+                    () -> loansButton.fire()
+            );
+
+            VBox overdueLoansCard = createStatCard(
+                    "Préstamos Vencidos",
+                    String.valueOf(overdueLoans),
+                    ERROR_COLOR,
+                    new FontIcon(FontAwesomeSolid.EXCLAMATION_TRIANGLE),
+                    () -> loansButton.fire() // Puedes cambiar esto si tienes botón específico para vencidos
+            );
+
+            VBox usersCount = createStatCard(
+                    "Usuarios Registrados",
+                    String.valueOf(totalUsers),
+                    PRIMARY_COLOR,
+                    new FontIcon(FontAwesomeSolid.USER_FRIENDS),
+                    () -> usersButton.fire()
+            );
+
+            return new HBox(20, inventoryStats, activeLoansCard, overdueLoansCard, usersCount);
+        } catch (SQLException e) {
+            AlertUtils.showError("Error", "No se pudieron cargar las estadísticas");
+            return new HBox();
+        }
     }
 
-    private VBox createStatCard(String title, String value, String color, FontIcon icon) {
-        // Contenedor principal de la tarjeta con efecto de elevación
+    private VBox createStatCard(String title, String value, String color, FontIcon icon, Runnable onClickAction) {
         VBox card = new VBox(15);
         card.setPadding(new Insets(20));
         card.getStyleClass().add("stat-card");
         card.setStyle("-fx-background-color: " + CARD_COLOR + "; -fx-background-radius: 8px;");
         JFXDepthManager.setDepth(card, 1);
 
-        // Icono de la tarjeta
         icon.setIconSize(28);
         icon.setIconColor(Color.web(color));
 
@@ -744,12 +839,10 @@ public class MainWindow {
         iconContainer.setStyle("-fx-background-color: " + color + "22; -fx-background-radius: 50%;");
         iconContainer.setPrefSize(50, 50);
 
-        // Valor destacado
         Label valueLabel = new Label(value);
         valueLabel.getStyleClass().add("stat-value");
         valueLabel.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
 
-        // Título de la tarjeta
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("stat-title");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: " + TEXT_SECONDARY + ";");
@@ -757,7 +850,7 @@ public class MainWindow {
         card.getChildren().addAll(iconContainer, valueLabel, titleLabel);
         card.setAlignment(Pos.CENTER);
 
-        // Añadir animación al hacer hover
+        // Hover animado
         card.setOnMouseEntered(e -> {
             card.setStyle("-fx-background-color: " + CARD_COLOR + "; -fx-background-radius: 8px; -fx-cursor: hand;");
             new Pulse(card).play();
@@ -769,7 +862,57 @@ public class MainWindow {
             JFXDepthManager.setDepth(card, 1);
         });
 
+        // Acción al hacer clic
+        card.setOnMouseClicked(e -> onClickAction.run());
+
         return card;
+    }
+
+    private Node createInventoryChart() {
+        try (Connection conn = DatabaseManager.connect()) {
+            InventarioDAO inventarioDAO = new InventarioSQLiteDAO(conn);
+            List<EquipoDTO> equipos = inventarioDAO.obtenerTodosLosEquipos();
+
+            // Agrupar por categoría
+            Map<String, Long> countsByCategory = equipos.stream()
+                    .collect(Collectors.groupingBy(EquipoDTO::getCategoria, Collectors.counting()));
+
+            PieChart pieChart = new PieChart();
+            countsByCategory.forEach((category, count) -> {
+                PieChart.Data slice = new PieChart.Data(category + " (" + count + ")", count);
+                pieChart.getData().add(slice);
+            });
+
+            pieChart.setTitle("Distribución de Inventario por Categoría");
+            pieChart.setLegendVisible(true);
+            pieChart.setLabelsVisible(true);
+            pieChart.setStyle("-fx-font-size: 12px;");
+
+            // Aplicar colores personalizados
+            applyCustomColors(pieChart);
+
+            VBox chartContainer = new VBox(pieChart);
+            chartContainer.setPadding(new Insets(20));
+            chartContainer.setStyle("-fx-background-color: " + CARD_COLOR + "; -fx-background-radius: 8px;");
+            JFXDepthManager.setDepth(chartContainer, 1);
+
+            return chartContainer;
+        } catch (SQLException e) {
+            Label errorLabel = new Label("Error al cargar gráfico de inventario");
+            errorLabel.setStyle("-fx-text-fill: " + ERROR_COLOR + ";");
+            return errorLabel;
+        }
+    }
+
+    private void applyCustomColors(PieChart pieChart) {
+        int i = 0;
+        String[] colors = {PRIMARY_COLOR, SECONDARY_COLOR, SUCCESS_COLOR, WARNING_COLOR, INFO_COLOR};
+
+        for (PieChart.Data data : pieChart.getData()) {
+            String color = colors[i % colors.length];
+            data.getNode().setStyle("-fx-pie-color: " + color + ";");
+            i++;
+        }
     }
 
     private VBox createRecentActivitiesSection() {
@@ -794,22 +937,30 @@ public class MainWindow {
         activitiesPanel.setStyle("-fx-background-color: " + CARD_COLOR + "; -fx-background-radius: 8px;");
         JFXDepthManager.setDepth(activitiesPanel, 1);
 
-        // Crear elementos de actividad de muestra
-        activitiesPanel.getChildren().addAll(
-                createActivityItem(
-                        "Nuevo item agregado al inventario",
-                        "Laptop Lenovo T14",
-                        "hace 2 horas",
-                        new FontIcon(FontAwesomeSolid.PLUS_CIRCLE),
-                        SUCCESS_COLOR
-                ),
-                createSeparator(),
-                createActivityItem("Préstamo realizado", "Proyector P1000 - Juan Pérez", "hace 1 día",                         new FontIcon(FontAwesomeSolid.ARROW_RIGHT), INFO_COLOR),
-                createSeparator(),
-                createActivityItem("Préstamo devuelto", "Cámara Canon T7i - María López", "hace 2 días",                        new FontIcon(FontAwesomeSolid.ARROW_LEFT), PRIMARY_COLOR),
-                createSeparator(),
-                createActivityItem("Préstamo vencido", "Tablet Samsung S6 - Carlos Ruiz", "hace 3 días",                         new FontIcon(FontAwesomeSolid.EXCLAMATION_CIRCLE), ERROR_COLOR)
-        );
+        // Obtener actividades recientes de la base de datos
+        try (Connection conn = DatabaseManager.connect()) {
+            InventarioDAO inventarioDAO = new InventarioSQLiteDAO(conn);
+            List<String> historial = inventarioDAO.obtenerHistorialReciente(5);
+
+            if (historial.isEmpty()) {
+                Label emptyLabel = new Label("No hay actividad reciente");
+                emptyLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-style: italic;");
+                activitiesPanel.getChildren().add(emptyLabel);
+            } else {
+                for (String actividad : historial) {
+                    activitiesPanel.getChildren().addAll(
+                            createActivityItem(actividad),
+                            createSeparator()
+                    );
+                }
+                // Remover el último separador
+                activitiesPanel.getChildren().remove(activitiesPanel.getChildren().size()-1);
+            }
+        } catch (SQLException e) {
+            Label errorLabel = new Label("Error al cargar actividades recientes");
+            errorLabel.setStyle("-fx-text-fill: " + ERROR_COLOR + ";");
+            activitiesPanel.getChildren().add(errorLabel);
+        }
 
         // Botón para ver más actividades
         JFXButton viewMoreButton = new JFXButton("Ver todas las actividades");
@@ -827,6 +978,68 @@ public class MainWindow {
 
         section.getChildren().addAll(headerBox, activitiesPanel, viewMoreButton);
         return section;
+    }
+
+    private HBox createActivityItem(String actividad) {
+        HBox item = new HBox(15);
+        item.setPadding(new Insets(15, 20, 15, 20));
+        item.setAlignment(Pos.CENTER_LEFT);
+
+        // Parsear la actividad (formato: [fecha hora] tipo - usuario: descripción)
+        String[] parts = actividad.split(" - |: ");
+        String fechaHora = parts.length > 0 ? parts[0] : "";
+        String tipoUsuario = parts.length > 1 ? parts[1] : "";
+        String descripcion = parts.length > 2 ? parts[2] : actividad;
+
+        FontIcon icon = getIconForActivityType(tipoUsuario);
+        String iconColor = getColorForActivityType(tipoUsuario);
+
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web(iconColor));
+
+        StackPane iconContainer = new StackPane(icon);
+        iconContainer.setStyle("-fx-background-color: " + iconColor + "22; -fx-background-radius: 50%;");
+        iconContainer.setPrefSize(35, 35);
+
+        // Información de la actividad
+        VBox infoBox = new VBox(3);
+        Label actionLabel = new Label(descripcion);
+        actionLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + TEXT_PRIMARY + ";");
+
+        Label detailsLabel = new Label(fechaHora);
+        detailsLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + ";");
+
+        infoBox.getChildren().addAll(actionLabel, detailsLabel);
+        HBox.setHgrow(infoBox, Priority.ALWAYS);
+
+        item.getChildren().addAll(iconContainer, infoBox);
+
+        // Efecto hover
+        item.setOnMouseEntered(e -> {
+            item.setStyle("-fx-background-color: rgba(0,0,0,0.03); -fx-cursor: hand;");
+        });
+
+        item.setOnMouseExited(e -> {
+            item.setStyle("-fx-background-color: transparent;");
+        });
+
+        return item;
+    }
+
+    private FontIcon getIconForActivityType(String tipo) {
+        if (tipo.contains("CREACION")) return new FontIcon(FontAwesomeSolid.PLUS_CIRCLE);
+        if (tipo.contains("ACTUALIZACION")) return new FontIcon(FontAwesomeSolid.EDIT);
+        if (tipo.contains("ELIMINACION")) return new FontIcon(FontAwesomeSolid.TRASH);
+        if (tipo.contains("PRESTAMO")) return new FontIcon(FontAwesomeSolid.HAND_HOLDING);
+        return new FontIcon(FontAwesomeSolid.INFO_CIRCLE);
+    }
+
+    private String getColorForActivityType(String tipo) {
+        if (tipo.contains("CREACION")) return SUCCESS_COLOR;
+        if (tipo.contains("ACTUALIZACION")) return INFO_COLOR;
+        if (tipo.contains("ELIMINACION")) return ERROR_COLOR;
+        if (tipo.contains("PRESTAMO")) return PRIMARY_COLOR;
+        return TEXT_SECONDARY;
     }
 
     private HBox createActivityItem(String action, String details, String time, FontIcon icon, String iconColor) {

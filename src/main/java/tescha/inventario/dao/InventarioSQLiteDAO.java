@@ -34,12 +34,50 @@ public class InventarioSQLiteDAO implements InventarioDAO {
     @Override
     public void agregarEquipo(EquipoDTO equipo) {
         String sql = """
-        INSERT INTO inventario (
-            nombre, categoria, subcategoria, cantidad, cantidad_minima, status,
-            ubicacion, numero_serie, marca, modelo, fecha_adquisicion, costo_adquisicion,
-            proveedor, garantia, vencimiento_garantia, mantenimiento_programado,
-            ultimo_mantenimiento, proximo_mantenimiento, notas, imagen, imagenes, qrcode
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO inventario (
+        nombre, categoria, subcategoria, cantidad, cantidad_minima, status,
+        ubicacion, numero_serie, marca, modelo, notas, imagen
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, equipo.getNombre());
+            pstmt.setString(2, equipo.getCategoria());
+            pstmt.setString(3, equipo.getSubcategoria());
+            pstmt.setInt(4, equipo.getCantidad());
+            pstmt.setInt(5, equipo.getCantidadMinima());
+            pstmt.setString(6, equipo.getStatus());
+            pstmt.setString(7, equipo.getUbicacion());
+            pstmt.setString(8, equipo.getNumeroSerie());
+            pstmt.setString(9, equipo.getMarca());
+            pstmt.setString(10, equipo.getModelo());
+            pstmt.setString(11, equipo.getNotas());
+            pstmt.setString(12, equipo.getImagen());
+
+            pstmt.executeUpdate();
+
+            // Obtener el ID generado
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    equipo.setId(generatedKeys.getInt(1));
+                }
+            }
+
+            registrarMovimiento(equipo.getId(), "CREACION", "Nuevo equipo agregado", "Sistema");
+        } catch (SQLException e) {
+            System.err.println("Error al agregar equipo: " + e.getMessage());
+            throw new RuntimeException("Failed to add equipment", e);
+        }
+    }
+
+    @Override
+    public void actualizarEquipo(EquipoDTO equipo) {
+        String sql = """
+        UPDATE inventario SET 
+            nombre = ?, categoria = ?, subcategoria = ?, cantidad = ?, cantidad_minima = ?, 
+            status = ?, ubicacion = ?, numero_serie = ?, marca = ?, modelo = ?, 
+            notas = ?, imagen = ?
+        WHERE id = ?
         """;
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -53,68 +91,9 @@ public class InventarioSQLiteDAO implements InventarioDAO {
             pstmt.setString(8, equipo.getNumeroSerie());
             pstmt.setString(9, equipo.getMarca());
             pstmt.setString(10, equipo.getModelo());
-            pstmt.setString(11, equipo.getFechaAdquisicion() != null ? equipo.getFechaAdquisicion().toString() : null);
-            pstmt.setDouble(12, equipo.getCostoAdquisicion());
-            pstmt.setString(13, equipo.getProveedor());
-            pstmt.setString(14, equipo.getGarantia());
-            pstmt.setString(15, equipo.getVencimientoGarantia() != null ? equipo.getVencimientoGarantia().toString() : null);
-            pstmt.setString(16, equipo.getMantenimientoProgramado());
-            pstmt.setString(17, equipo.getUltimoMantenimiento() != null ? equipo.getUltimoMantenimiento().toString() : null);
-            pstmt.setString(18, equipo.getProximoMantenimiento() != null ? equipo.getProximoMantenimiento().toString() : null);
-            pstmt.setString(19, equipo.getNotas());
-            pstmt.setString(20, equipo.getImagen());
-
-            // Manejar imágenes null
-            String imagenesStr = equipo.getImagenes() != null ? String.join(",", equipo.getImagenes()) : "";
-            pstmt.setString(21, imagenesStr);
-
-            pstmt.setString(22, equipo.getQrcode());
-
-            pstmt.executeUpdate();
-
-            registrarMovimiento(equipo.getId(), "CREACION", "Nuevo equipo agregado", "Sistema");
-        } catch (SQLException e) {
-            System.err.println("Error al agregar equipo: " + e.getMessage());
-            throw new RuntimeException("Failed to add equipment", e);
-        }
-    }
-
-    @Override
-    public void actualizarEquipo(EquipoDTO equipo) {
-        String sql = """
-            UPDATE inventario SET 
-                nombre = ?, categoria = ?, subcategoria = ?, cantidad = ?, cantidad_minima = ?, 
-                status = ?, ubicacion = ?, numero_serie = ?, marca = ?, modelo = ?, 
-                fecha_adquisicion = ?, costo_adquisicion = ?, proveedor = ?, garantia = ?, 
-                vencimiento_garantia = ?, mantenimiento_programado = ?, ultimo_mantenimiento = ?, 
-                proximo_mantenimiento = ?, notas = ?, imagen = ?, imagenes = ?, qrcode = ?
-            WHERE id = ?
-            """;
-
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, equipo.getNombre());
-            pstmt.setString(2, equipo.getCategoria());
-            pstmt.setString(3, equipo.getSubcategoria());
-            pstmt.setInt(4, equipo.getCantidad());
-            pstmt.setInt(5, equipo.getCantidadMinima());
-            pstmt.setString(6, equipo.getStatus());
-            pstmt.setString(7, equipo.getUbicacion());
-            pstmt.setString(8, equipo.getNumeroSerie());
-            pstmt.setString(9, equipo.getMarca());
-            pstmt.setString(10, equipo.getModelo());
-            pstmt.setString(11, equipo.getFechaAdquisicion() != null ? equipo.getFechaAdquisicion().toString() : null);
-            pstmt.setDouble(12, equipo.getCostoAdquisicion());
-            pstmt.setString(13, equipo.getProveedor());
-            pstmt.setString(14, equipo.getGarantia());
-            pstmt.setString(15, equipo.getVencimientoGarantia() != null ? equipo.getVencimientoGarantia().toString() : null);
-            pstmt.setString(16, equipo.getMantenimientoProgramado());
-            pstmt.setString(17, equipo.getUltimoMantenimiento() != null ? equipo.getUltimoMantenimiento().toString() : null);
-            pstmt.setString(18, equipo.getProximoMantenimiento() != null ? equipo.getProximoMantenimiento().toString() : null);
-            pstmt.setString(19, equipo.getNotas());
-            pstmt.setString(20, equipo.getImagen());
-            pstmt.setString(21, String.join(",", equipo.getImagenes()));
-            pstmt.setString(22, equipo.getQrcode());
-            pstmt.setInt(23, equipo.getId());
+            pstmt.setString(11, equipo.getNotas());
+            pstmt.setString(12, equipo.getImagen());
+            pstmt.setInt(13, equipo.getId());
 
             pstmt.executeUpdate();
 
@@ -123,6 +102,8 @@ public class InventarioSQLiteDAO implements InventarioDAO {
             System.err.println("Error al actualizar equipo: " + e.getMessage());
         }
     }
+
+
 
     @Override
     public void eliminarEquipo(int id) {
@@ -167,6 +148,36 @@ public class InventarioSQLiteDAO implements InventarioDAO {
         return equipos;
     }
 
+    @Override
+    public List<String> obtenerHistorialReciente(int limit) {
+        List<String> historial = new ArrayList<>();
+        String sql = """
+            SELECT m.fecha, m.hora, m.tipo, m.usuario, m.descripcion, i.nombre as item_nombre 
+            FROM mov_hist m
+            LEFT JOIN inventario i ON m.id_item = i.id
+            ORDER BY m.fecha DESC, m.hora DESC
+            LIMIT ?
+            """;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, limit);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                String registro = String.format("[%s %s] %s - %s: %s (%s)",
+                        rs.getString("fecha"),
+                        rs.getString("hora"),
+                        rs.getString("tipo"),
+                        rs.getString("usuario"),
+                        rs.getString("descripcion"),
+                        rs.getString("item_nombre"));
+                historial.add(registro);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener historial reciente: " + e.getMessage());
+        }
+        return historial;
+    }
     @Override
     public List<EquipoDTO> buscarPorNombre(String nombre) {
         List<EquipoDTO> equipos = new ArrayList<>();
@@ -216,11 +227,11 @@ public class InventarioSQLiteDAO implements InventarioDAO {
 
     @Override
     public void registrarMovimiento(int equipoId, String tipo, String descripcion, String usuario) {
-        String sql = "INSERT INTO historial_inventario (equipo_id, tipo_movimiento, cantidad, usuario, fecha, notas) VALUES (?, ?, ?, ?, datetime('now'), ?)";
+        String sql = "INSERT INTO mov_hist (id_item, tipo, qty, usuario, fecha, hora, descripcion) VALUES (?, ?, ?, ?, date('now'), time('now'), ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, equipoId);
             pstmt.setString(2, tipo);
-            pstmt.setInt(3, 0); // Cantidad para préstamos/devoluciones
+            pstmt.setInt(3, 0); // Cantidad por defecto
             pstmt.setString(4, usuario);
             pstmt.setString(5, descripcion);
             pstmt.executeUpdate();
@@ -232,16 +243,17 @@ public class InventarioSQLiteDAO implements InventarioDAO {
     @Override
     public List<String> obtenerHistorialEquipo(int equipoId) {
         List<String> historial = new ArrayList<>();
-        String sql = "SELECT tipo_movimiento, usuario, fecha, notas FROM historial_inventario WHERE equipo_id = ? ORDER BY fecha DESC";
+        String sql = "SELECT fecha, hora, tipo, usuario, descripcion FROM mov_hist WHERE id_item = ? ORDER BY fecha DESC, hora DESC";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, equipoId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                String registro = String.format("[%s] %s - %s: %s",
+                String registro = String.format("[%s %s] %s - %s: %s",
                         rs.getString("fecha"),
-                        rs.getString("tipo_movimiento"),
+                        rs.getString("hora"),
+                        rs.getString("tipo"),
                         rs.getString("usuario"),
-                        rs.getString("notas"));
+                        rs.getString("descripcion"));
                 historial.add(registro);
             }
         } catch (SQLException e) {
@@ -249,6 +261,7 @@ public class InventarioSQLiteDAO implements InventarioDAO {
         }
         return historial;
     }
+
 
     @Override
     public List<CategoriaDTO> obtenerTodasCategorias() {
@@ -327,34 +340,8 @@ public class InventarioSQLiteDAO implements InventarioDAO {
         equipo.setNumeroSerie(rs.getString("numero_serie"));
         equipo.setMarca(rs.getString("marca"));
         equipo.setModelo(rs.getString("modelo"));
-
-        String fechaAdq = rs.getString("fecha_adquisicion");
-        if (fechaAdq != null) equipo.setFechaAdquisicion(LocalDate.parse(fechaAdq));
-
-        equipo.setCostoAdquisicion(rs.getDouble("costo_adquisicion"));
-        equipo.setProveedor(rs.getString("proveedor"));
-        equipo.setGarantia(rs.getString("garantia"));
-
-        String vencGarantia = rs.getString("vencimiento_garantia");
-        if (vencGarantia != null) equipo.setVencimientoGarantia(LocalDate.parse(vencGarantia));
-
-        equipo.setMantenimientoProgramado(rs.getString("mantenimiento_programado"));
-
-        String ultimoMant = rs.getString("ultimo_mantenimiento");
-        if (ultimoMant != null) equipo.setUltimoMantenimiento(LocalDate.parse(ultimoMant));
-
-        String proxMant = rs.getString("proximo_mantenimiento");
-        if (proxMant != null) equipo.setProximoMantenimiento(LocalDate.parse(proxMant));
-
         equipo.setNotas(rs.getString("notas"));
         equipo.setImagen(rs.getString("imagen"));
-
-        String imagenesStr = rs.getString("imagenes");
-        if (imagenesStr != null) {
-            equipo.setImagenes(List.of(imagenesStr.split(",")));
-        }
-
-        equipo.setQrcode(rs.getString("qrcode"));
         return equipo;
     }
 }

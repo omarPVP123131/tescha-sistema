@@ -60,8 +60,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS departamentos (
                 id INTEGER PRIMARY KEY,
                 nombre TEXT UNIQUE NOT NULL,
-                descripcion TEXT,
-                responsable TEXT
+                descripcion TEXT
             )
             """,
 
@@ -90,17 +89,8 @@ public class DatabaseManager {
             numero_serie TEXT,
             marca TEXT,
             modelo TEXT,
-            fecha_adquisicion TEXT,
-            costo_adquisicion REAL,
-            proveedor TEXT,
-            garantia TEXT,
-            vencimiento_garantia TEXT,
-            mantenimiento_programado TEXT,
-            ultimo_mantenimiento TEXT,
-            proximo_mantenimiento TEXT,
             notas TEXT,
             imagen TEXT,
-            imagenes TEXT,
             qrcode TEXT
         )
         """,

@@ -70,8 +70,8 @@ public class CategoriaWindow extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         initStyle(StageStyle.DECORATED);
         setTitle("Gestión de Categorías");
-        setMinWidth(600);
-        setMinHeight(300);
+        setMinWidth(300);
+        setMinHeight(150);
 
         // Crear escena principal
         Scene scene = new Scene(crearContenidoPrincipal());
@@ -92,7 +92,6 @@ public class CategoriaWindow extends Stage {
         configurarTabla();
         configurarValidaciones();
         configurarIconosPanel();
-        configurarVistaPrevia();
         cargarCategorias();
 
         setOnShown(e -> Platform.runLater(campoNombre::requestFocus));
@@ -177,16 +176,12 @@ public class CategoriaWindow extends Stage {
         iconosScroll.setStyle("-fx-background-color: white;");
         iconosContainer.getChildren().addAll(iconosLabel, iconosScroll);
 
-        // Vista previa
-        VBox previewContainer = crearVistaPrevia();
-
         // Agregar todos los elementos al formulario
         formularioContainer.getChildren().addAll(
                 tituloForm,
                 fila1,
                 colorBox,
-                iconosContainer,
-                previewContainer
+                iconosContainer
         );
 
         return formularioContainer;
@@ -279,42 +274,7 @@ public class CategoriaWindow extends Stage {
         }
     }
 
-    private VBox crearVistaPrevia() {
-        Label previewLabel = new Label("Vista previa");
-        previewLabel.getStyleClass().add("section-subtitle");
 
-        // Contenedor para la vista previa
-        previewPane.setPrefHeight(50);
-        previewPane.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 4;");
-
-        // Elementos de la vista previa
-        nombrePreview.setText("Nombre de categoría");
-        iconoPreview.setGlyphSize(18);
-
-        // Configurar el contenido de la vista previa
-        previewContent.setAlignment(Pos.CENTER_LEFT);
-        previewContent.setSpacing(15);
-        previewContent.setPadding(new Insets(15));
-        previewContent.getChildren().addAll(iconoPreview, nombrePreview);
-
-        // Actualizar la vista previa inicial
-        actualizarVistaPrevia("Nombre de categoría", iconoSeleccionado, "#2196F3");
-
-        StackPane previewStack = new StackPane(previewPane, previewContent);
-        previewStack.setPadding(new Insets(10, 0, 0, 0));
-
-        // Contenedor para la etiqueta y la vista previa
-        VBox previewContainer = new VBox(5);
-        previewContainer.getChildren().addAll(previewLabel, previewStack);
-
-        return previewContainer;
-    }
-
-    private void configurarVistaPrevia() {
-        // Configurar el comportamiento de la vista previa
-        nombrePreview.setStyle("-fx-font-size: 14px;");
-        iconoPreview.setGlyphSize(18);
-    }
 
     private void actualizarVistaPrevia(String nombre, String icono, String color) {
         // Actualizar texto

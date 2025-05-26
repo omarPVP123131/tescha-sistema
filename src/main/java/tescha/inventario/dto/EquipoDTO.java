@@ -1,36 +1,21 @@
 package tescha.inventario.dto;
 
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
-import javafx.scene.image.Image;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.time.LocalDate;
-import java.util.Base64;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.oned.Code128Writer;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
+import javafx.scene.image.Image;
 
-import javax.imageio.ImageIO;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
+import java.util.EnumMap;
+import java.util.Map;
 
-public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
+public class EquipoDTO {
     private final IntegerProperty id = new SimpleIntegerProperty();
     private final StringProperty nombre = new SimpleStringProperty();
     private final StringProperty categoria = new SimpleStringProperty();
@@ -42,17 +27,8 @@ public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
     private final StringProperty numeroSerie = new SimpleStringProperty();
     private final StringProperty marca = new SimpleStringProperty();
     private final StringProperty modelo = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> fechaAdquisicion = new SimpleObjectProperty<>();
-    private final DoubleProperty costoAdquisicion = new SimpleDoubleProperty();
-    private final StringProperty proveedor = new SimpleStringProperty();
-    private final StringProperty garantia = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> vencimientoGarantia = new SimpleObjectProperty<>();
-    private final StringProperty mantenimientoProgramado = new SimpleStringProperty();
-    private final ObjectProperty<LocalDate> ultimoMantenimiento = new SimpleObjectProperty<>();
-    private final ObjectProperty<LocalDate> proximoMantenimiento = new SimpleObjectProperty<>();
     private final StringProperty notas = new SimpleStringProperty();
     private final StringProperty imagen = new SimpleStringProperty();
-    private final ListProperty<String> imagenes = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty qrcode = new SimpleStringProperty();
 
     // Properties
@@ -67,20 +43,11 @@ public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
     public StringProperty numeroSerieProperty() { return numeroSerie; }
     public StringProperty marcaProperty() { return marca; }
     public StringProperty modeloProperty() { return modelo; }
-    public ObjectProperty<LocalDate> fechaAdquisicionProperty() { return fechaAdquisicion; }
-    public DoubleProperty costoAdquisicionProperty() { return costoAdquisicion; }
-    public StringProperty proveedorProperty() { return proveedor; }
-    public StringProperty garantiaProperty() { return garantia; }
-    public ObjectProperty<LocalDate> vencimientoGarantiaProperty() { return vencimientoGarantia; }
-    public StringProperty mantenimientoProgramadoProperty() { return mantenimientoProgramado; }
-    public ObjectProperty<LocalDate> ultimoMantenimientoProperty() { return ultimoMantenimiento; }
-    public ObjectProperty<LocalDate> proximoMantenimientoProperty() { return proximoMantenimiento; }
     public StringProperty notasProperty() { return notas; }
     public StringProperty imagenProperty() { return imagen; }
-    public ListProperty<String> imagenesProperty() { return imagenes; }
     public StringProperty qrcodeProperty() { return qrcode; }
 
-    // Getters y Setters
+    // Getters and Setters
     public int getId() { return id.get(); }
     public void setId(int id) { this.id.set(id); }
 
@@ -114,44 +81,21 @@ public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
     public String getModelo() { return modelo.get(); }
     public void setModelo(String modelo) { this.modelo.set(modelo); }
 
-    public LocalDate getFechaAdquisicion() { return fechaAdquisicion.get(); }
-    public void setFechaAdquisicion(LocalDate fechaAdquisicion) { this.fechaAdquisicion.set(fechaAdquisicion); }
-
-    public double getCostoAdquisicion() { return costoAdquisicion.get(); }
-    public void setCostoAdquisicion(double costoAdquisicion) { this.costoAdquisicion.set(costoAdquisicion); }
-
-    public String getProveedor() { return proveedor.get(); }
-    public void setProveedor(String proveedor) { this.proveedor.set(proveedor); }
-
-    public String getGarantia() { return garantia.get(); }
-    public void setGarantia(String garantia) { this.garantia.set(garantia); }
-
-    public LocalDate getVencimientoGarantia() { return vencimientoGarantia.get(); }
-    public void setVencimientoGarantia(LocalDate vencimientoGarantia) { this.vencimientoGarantia.set(vencimientoGarantia); }
-
-    public String getMantenimientoProgramado() { return mantenimientoProgramado.get(); }
-    public void setMantenimientoProgramado(String mantenimientoProgramado) { this.mantenimientoProgramado.set(mantenimientoProgramado); }
-
-    public LocalDate getUltimoMantenimiento() { return ultimoMantenimiento.get(); }
-    public void setUltimoMantenimiento(LocalDate ultimoMantenimiento) { this.ultimoMantenimiento.set(ultimoMantenimiento); }
-
-    public LocalDate getProximoMantenimiento() { return proximoMantenimiento.get(); }
-    public void setProximoMantenimiento(LocalDate proximoMantenimiento) { this.proximoMantenimiento.set(proximoMantenimiento); }
-
     public String getNotas() { return notas.get(); }
     public void setNotas(String notas) { this.notas.set(notas); }
 
     public String getImagen() { return imagen.get(); }
     public void setImagen(String imagen) { this.imagen.set(imagen); }
 
-    public List<String> getImagenes() { return imagenes.get(); }
-    public void setImagenes(List<String> imagenes) { this.imagenes.setAll(imagenes); }
-
     public String getQrcode() { return qrcode.get(); }
     public void setQrcode(String qrcode) { this.qrcode.set(qrcode); }
 
+    @Override
+    public String toString() {
+        return nombre.get();
+    }
     /**
-     * Genera un código de barras con los datos clave del producto en formato legible por pistola
+     * Genera un código QR con los datos clave del producto en formato legible por pistola
      * Estructura: ID|NOMBRE|CATEGORIA|SERIE (optimizado para lectura y procesamiento)
      */
     public void generarCodigoBarrasDinamico() {
@@ -187,7 +131,7 @@ public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
     }
 
     /**
-     * Devuelve un Image de JavaFX con el código de barras, generándolo
+     * Devuelve un Image de JavaFX con el código QR, generándolo
      * si aún no existe.
      */
     public Image getBarcodeImage() {
@@ -205,7 +149,6 @@ public class EquipoDTO extends RecursiveTreeObject<EquipoDTO> {
             );
         }
     }
-
 
     public boolean isStockBajo() {
         return getCantidad() <= getCantidadMinima();
