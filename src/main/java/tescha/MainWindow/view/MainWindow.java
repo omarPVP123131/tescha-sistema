@@ -44,6 +44,11 @@ import tescha.inventario.dao.InventarioSQLiteDAO;
 import tescha.inventario.dto.EquipoDTO;
 import tescha.inventario.service.InventarioService;
 import tescha.inventario.view.InventarioView;
+import tescha.prestamos.controller.PrestamoController;
+import tescha.prestamos.dao.PrestamoDAO;
+import tescha.prestamos.dao.PrestamoSQLiteDAO;
+import tescha.prestamos.service.PrestamoService;
+import tescha.prestamos.view.PrestamoView;
 import tescha.users.controller.UserController;
 import tescha.users.service.UserService;
 import tescha.users.dao.*;
@@ -480,9 +485,18 @@ public class MainWindow {
 
         loansButton.setOnAction(e -> {
             setActiveButton(loansButton);
-            showPlaceholder("Módulo de Préstamos");
-        });
+            try {
+                Connection connection = DatabaseManager.connect();
+                PrestamoDAO prestamoDAO = new PrestamoSQLiteDAO(connection);
+                PrestamoService prestamoService = new PrestamoService(prestamoDAO);
+                PrestamoController prestamoController = new PrestamoController(prestamoService);
+                PrestamoView prestamoView = new PrestamoView(prestamoController);
 
+                setContent(prestamoView.getView());
+            } catch (SQLException ex) {
+                System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
+            }
+        });
 
         // Configurar visibilidad según el rol
         if (!"admin".equalsIgnoreCase(role)) {
