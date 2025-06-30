@@ -68,16 +68,17 @@ public class AlertUtils {
         showStyledAlert(title, message, SUCCESS_COLOR, FontAwesomeIcon.CHECK_CIRCLE, false);
     }
 
-    public static boolean showConfirmation(String title, String message) {
-        Alert alert = createBaseAlert(title, message, CONFIRM_COLOR, FontAwesomeIcon.QUESTION_CIRCLE);
+    public static boolean showConfirmation(String title, String header, String message) {
+        Alert alert = createBaseAlert(title, header, CONFIRM_COLOR, FontAwesomeIcon.QUESTION_CIRCLE);
+        alert.setContentText(message);
 
         ButtonType confirmButton = new ButtonType("Confirmar", ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE);
+        ButtonType cancelButton  = new ButtonType("Cancelar",  ButtonData.CANCEL_CLOSE);
         alert.getButtonTypes().setAll(confirmButton, cancelButton);
 
+        // Estilado de botones (idéntico al otro método)
         Node confirmNode = alert.getDialogPane().lookupButton(confirmButton);
         confirmNode.setStyle(BUTTON_STYLE + "-fx-background-color: " + CONFIRM_COLOR + "; -fx-text-fill: white;");
-
         Node cancelNode = alert.getDialogPane().lookupButton(cancelButton);
         cancelNode.setStyle(BUTTON_STYLE + "-fx-background-color: transparent; -fx-text-fill: #555; -fx-border-color: #ddd;");
 

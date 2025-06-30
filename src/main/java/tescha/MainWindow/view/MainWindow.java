@@ -5,9 +5,9 @@ import com.jfoenix.transitions.hamburger.HamburgerBackArrowBasicTransition;
 import animatefx.animation.*;
 import javafx.animation.*;
 import javafx.scene.chart.PieChart;
+import javafx.scene.control.Tooltip;
 import org.kordamp.ikonli.fontawesome5.*;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.material.Material;
 import com.jfoenix.effects.JFXDepthManager;
 
 import javafx.geometry.Insets;
@@ -15,7 +15,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -35,7 +34,10 @@ import tescha.configuracion.view.ConfiguracionView;
 import tescha.database.DatabaseManager;
 import tescha.departamento.controller.DepartamentoController;
 import tescha.departamento.dao.DepartamentoDAO;
+import tescha.departamento.dao.DepartamentoHistorialDAO;
+import tescha.departamento.dao.DepartamentoHistorialSQLiteDAO;
 import tescha.departamento.dao.DepartamentoSQLiteDAO;
+import tescha.departamento.service.DepartamentoHistorialService;
 import tescha.departamento.service.DepartamentoService;
 import tescha.departamento.view.DepartamentoView;
 import tescha.inventario.controller.InventarioController;
@@ -88,6 +90,7 @@ public class MainWindow {
     private final String ERROR_COLOR      = "#D32F2F";
     private final String INFO_COLOR       = "#0288D1";
     private final String CARD_COLOR_DARKER = "#212121";
+    private final String SIDEBAR_COLOR    = "#263238";
 
     // Botones del menú
     private JFXButton dashboardButton;
@@ -96,8 +99,10 @@ public class MainWindow {
     private JFXButton loansButton;
     private JFXButton usersButton;
     private JFXButton reportsButton;
-    private JFXButton settingsButton;
+
     private JFXButton helpButton;
+    private Label dbStatusLabel;
+    private Label lastUpdateLabel;
 
     public MainWindow(String username, String role, Image avatar) {
         this.username = username;
@@ -113,9 +118,9 @@ public class MainWindow {
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef, #dee2e6);");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
 
-        // Barra superior con efecto de elevación
-        HBox topBar = createTopBar();
-        JFXDepthManager.setDepth(topBar, 2);
+// Header mejorado con gradiente sutil
+        HBox topBar = createEnhancedTopBar();
+        JFXDepthManager.setDepth(topBar, 3);
         root.setTop(topBar);
 
         // Sidebar y drawer
@@ -123,6 +128,7 @@ public class MainWindow {
 
         // Área de contenido principal
         contentArea = new StackPane();
+        contentArea.setId("contentArea");
         contentArea.getStyleClass().add("content-container");
         contentArea.setPadding(new Insets(15));
         contentArea.setStyle("-fx-background-color: " + BACKGROUND_COLOR + ";");
@@ -370,7 +376,7 @@ public class MainWindow {
         drawer.setResizableOnDrag(false);
 
         // Contenido del sidebar con diseño mejorado
-        VBox sidebar = createSidebar();
+        VBox sidebar = createEnhancedSidebar();
         JFXDepthManager.setDepth(sidebar, 1);
         drawer.setSidePane(sidebar);
 
@@ -445,24 +451,406 @@ public class MainWindow {
         return container;
     }
 
-    private VBox createSidebar() {
-        // Sección de perfil de usuario mejorada
-        userProfileSection = createUserProfileSection();
+    private void setupEnhancedDrawerAndSidebar() {
+        drawer = new JFXDrawer();
+        drawer.setDefaultDrawerSize(280);
+        drawer.setDirection(JFXDrawer.DrawerDirection.LEFT);
+        drawer.setResizeContent(true);
+        drawer.setOverLayVisible(false);
+        drawer.setResizableOnDrag(false);
 
-        // Crear botones del menú con íconos
-        dashboardButton = createMenuButton("Dashboard", new FontIcon(FontAwesomeSolid.TACHOMETER_ALT));
-        inventoryButton = createMenuButton("Inventario", new FontIcon(FontAwesomeSolid.BOX));
-        loansButton = createMenuButton("Préstamos", new FontIcon(FontAwesomeSolid.HAND_HOLDING));
-        usersButton = createMenuButton("Usuarios", new FontIcon(FontAwesomeSolid.USERS));
-        departamentosButton = createMenuButton("Departamentos", new FontIcon(FontAwesomeSolid.BUILDING));
-        reportsButton = createMenuButton("Reportes", new FontIcon(FontAwesomeSolid.CHART_BAR));
-        settingsButton = createMenuButton("Configuración", new FontIcon(FontAwesomeSolid.COG));
-        helpButton = createMenuButton("Ayuda", new FontIcon(FontAwesomeSolid.QUESTION_CIRCLE));
+        VBox sidebar = createEnhancedSidebar();
+        JFXDepthManager.setDepth(sidebar, 2);
+        drawer.setSidePane(sidebar);
+
+        drawer.setOnDrawerOpening(e -> {
+            root.setLeft(drawer);
+            contentArea.getStyleClass().remove("content-expanded");
+        });
+
+        drawer.setOnDrawerClosed(e -> {
+            root.setLeft(null);
+            contentArea.getStyleClass().add("content-expanded");
+        });
+
+        root.setLeft(drawer);
+    }
+
+    private VBox createEnhancedSidebar() {
+        // Sección de perfil mejorada
+        userProfileSection = createEnhancedUserProfileSection();
+
+        // Crear botones del menú con mejor diseño
+        dashboardButton = createEnhancedMenuButton("Dashboard", new FontIcon(FontAwesomeSolid.TACHOMETER_ALT), "Ctrl+1");
+        inventoryButton = createEnhancedMenuButton("Inventario", new FontIcon(FontAwesomeSolid.BOXES), "Ctrl+2");
+        loansButton = createEnhancedMenuButton("Préstamos", new FontIcon(FontAwesomeSolid.HANDSHAKE), "Ctrl+3");
+        usersButton = createEnhancedMenuButton("Usuarios", new FontIcon(FontAwesomeSolid.USERS_COG), "Ctrl+4");
+        departamentosButton = createEnhancedMenuButton("Departamentos", new FontIcon(FontAwesomeSolid.BUILDING), "Ctrl+5");
+        reportsButton = createEnhancedMenuButton("Reportes", new FontIcon(FontAwesomeSolid.CHART_LINE), "Ctrl+6");
+        helpButton = createEnhancedMenuButton("Ayuda", new FontIcon(FontAwesomeSolid.QUESTION_CIRCLE), "F1");
 
         // Establecer dashboard como activo por defecto
         dashboardButton.getStyleClass().add("active-menu-button");
 
-        // Manejadores de eventos
+        // Configurar eventos
+        setupMenuButtonEvents();
+
+        // Contenedor de botones del menú
+        VBox menuButtons = new VBox(5);
+        menuButtons.setPadding(new Insets(20, 15, 20, 15));
+
+        menuButtons.getChildren().addAll(dashboardButton, inventoryButton, loansButton);
+
+        if ("admin".equalsIgnoreCase(role)) {
+            menuButtons.getChildren().addAll(usersButton, departamentosButton, reportsButton);
+        }
+
+        menuButtons.getChildren().add(helpButton);
+
+        // Botón de cerrar sesión mejorado
+        JFXButton logoutButton = createLogoutButton();
+
+        // Información de versión mejorada
+        VBox versionInfo = createVersionInfo();
+
+        // Layout completo del sidebar
+        VBox sidebar = new VBox(0);
+        sidebar.setStyle("-fx-background-color: " + SIDEBAR_COLOR + ";");
+        sidebar.setMinWidth(280);
+        sidebar.setPrefWidth(280);
+
+        VBox.setVgrow(menuButtons, Priority.ALWAYS);
+
+        sidebar.getChildren().addAll(
+                userProfileSection,
+                menuButtons,
+                versionInfo,
+                logoutButton
+        );
+
+        return sidebar;
+    }
+    private HBox createEnhancedTopBar() {
+        // Hamburger con mejor animación
+        JFXHamburger hamburger = new JFXHamburger();
+        hamburger.getStyleClass().add("hamburger-icon");
+        hamburger.setStyle("-fx-cursor: hand;");
+
+        HamburgerBackArrowBasicTransition transition = new HamburgerBackArrowBasicTransition(hamburger);
+        transition.setRate(-1);
+        hamburger.setOnMouseClicked(e -> {
+            transition.setRate(transition.getRate() * -1);
+            transition.play();
+
+            if (isDrawerOpen) {
+                new SlideOutLeft(drawer).play();
+                drawer.close();
+            } else {
+                drawer.open();
+                new SlideInRight(drawer).play();
+            }
+            isDrawerOpen = !isDrawerOpen;
+        });
+
+        // Título de la aplicación con mejor diseño
+        FontIcon appIcon = new FontIcon(FontAwesomeSolid.LAYER_GROUP);
+        appIcon.setIconSize(28);
+        appIcon.setIconColor(Color.web(PRIMARY_COLOR));
+
+        VBox titleContainer = new VBox(2);
+        Label appTitle = new Label("Sistema de Gestión Integral");
+        appTitle.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_PRIMARY + ";");
+
+        Label appSubtitle = new Label("Inventario • Préstamos • Usuarios");
+        appSubtitle.setStyle("-fx-font-size: 12px; -fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-style: italic;");
+
+        titleContainer.getChildren().addAll(appTitle, appSubtitle);
+
+        HBox titleBox = new HBox(15, appIcon, titleContainer);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Información de fecha y hora mejorada
+        VBox dateTimeContainer = createDateTimeContainer();
+
+        // Perfil de usuario mejorado
+        HBox userProfile = createEnhancedUserProfile();
+
+        // Controles de ventana
+        HBox windowControls = createWindowControls();
+
+        // Layout del header
+        HBox leftSection = new HBox(20, hamburger, titleBox);
+        leftSection.setAlignment(Pos.CENTER_LEFT);
+
+        HBox centerSection = new HBox(dateTimeContainer);
+        centerSection.setAlignment(Pos.CENTER);
+        HBox.setHgrow(centerSection, Priority.ALWAYS);
+
+        HBox rightSection = new HBox(20, userProfile, windowControls);
+        rightSection.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox topBar = new HBox(leftSection, centerSection, rightSection);
+        topBar.setPadding(new Insets(15, 30, 15, 30));
+        topBar.setAlignment(Pos.CENTER);
+        topBar.setStyle("-fx-background-color: linear-gradient(to right, " + CARD_COLOR + ", #FAFBFC); " +
+                "-fx-border-color: #E1E5E9; -fx-border-width: 0 0 1 0;");
+
+        return topBar;
+    }
+
+    private VBox createDateTimeContainer() {
+        VBox container = new VBox(3);
+        container.setAlignment(Pos.CENTER);
+
+        FontIcon calendarIcon = new FontIcon(FontAwesomeSolid.CALENDAR_ALT);
+        calendarIcon.setIconSize(16);
+        calendarIcon.setIconColor(Color.web(PRIMARY_COLOR));
+
+        LocalDateTime now = LocalDateTime.now();
+        Label dateLabel = new Label(now.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy")));
+        dateLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + TEXT_PRIMARY + "; -fx-font-size: 14px;");
+
+        Label timeLabel = new Label(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        timeLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-size: 12px;");
+
+        // Actualizar la hora cada segundo
+        Timeline timeUpdater = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            LocalDateTime currentTime = LocalDateTime.now();
+            timeLabel.setText(currentTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        }));
+        timeUpdater.setCycleCount(Timeline.INDEFINITE);
+        timeUpdater.play();
+
+        HBox dateBox = new HBox(8, calendarIcon, dateLabel);
+        dateBox.setAlignment(Pos.CENTER);
+
+        container.getChildren().addAll(dateBox, timeLabel);
+        return container;
+    }
+
+    private HBox createEnhancedUserProfile() {
+        // Avatar mejorado con indicador de estado
+        StackPane avatarContainer = new StackPane();
+
+        ImageView avatarView = new ImageView(avatar);
+        avatarView.setFitWidth(45);
+        avatarView.setFitHeight(45);
+
+        Circle clip = new Circle(22.5, 22.5, 22.5);
+        avatarView.setClip(clip);
+
+        // Borde con gradiente
+        Circle border = new Circle(22.5, 22.5, 23.5);
+        border.setFill(Color.TRANSPARENT);
+        border.setStroke(Color.web(PRIMARY_COLOR));
+        border.setStrokeWidth(2);
+
+        // Indicador de estado online
+        Circle statusIndicator = new Circle(5, Color.web(SUCCESS_COLOR));
+        statusIndicator.setTranslateX(15);
+        statusIndicator.setTranslateY(15);
+        statusIndicator.setStroke(Color.WHITE);
+        statusIndicator.setStrokeWidth(2);
+
+        avatarContainer.getChildren().addAll(avatarView, border, statusIndicator);
+
+        // Información del usuario mejorada
+        VBox userInfo = new VBox(2);
+        Label usernameLabel = new Label(username);
+        usernameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: " + TEXT_PRIMARY + "; -fx-font-size: 14px;");
+
+        HBox roleContainer = new HBox(5);
+        roleContainer.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon roleIcon = new FontIcon(role.equalsIgnoreCase("admin") ?
+                FontAwesomeSolid.CROWN : FontAwesomeSolid.USER);
+        roleIcon.setIconSize(12);
+        roleIcon.setIconColor(Color.web(role.equalsIgnoreCase("admin") ? WARNING_COLOR : INFO_COLOR));
+
+        Label roleLabel = new Label(role.toUpperCase());
+        roleLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-size: 11px; -fx-font-weight: bold;");
+
+        roleContainer.getChildren().addAll(roleIcon, roleLabel);
+        userInfo.getChildren().addAll(usernameLabel, roleContainer);
+
+        HBox userProfile = new HBox(15, userInfo, avatarContainer);
+        userProfile.setAlignment(Pos.CENTER);
+        userProfile.setPadding(new Insets(8, 12, 8, 12));
+        userProfile.setStyle("-fx-background-radius: 25;");
+
+        // Efectos mejorados
+        userProfile.setOnMouseEntered(e -> {
+            userProfile.setStyle("-fx-cursor: hand; -fx-background-color: rgba(33, 150, 243, 0.1); -fx-background-radius: 25;");
+            new Pulse(avatarContainer).play();
+        });
+
+        userProfile.setOnMouseExited(e -> {
+            userProfile.setStyle("-fx-background-color: transparent; -fx-background-radius: 25;");
+        });
+
+        // Tooltip con información adicional
+        Tooltip userTooltip = new Tooltip("Usuario: " + username + "\nRol: " + role + "\nEstado: En línea");
+        Tooltip.install(userProfile, userTooltip);
+
+        return userProfile;
+    }
+
+    private HBox createEnhancedStatusBar() {
+        HBox statusBar = new HBox(20);
+        statusBar.setPadding(new Insets(8, 20, 8, 20));
+        statusBar.setStyle("-fx-background-color: " + CARD_COLOR + "; " +
+                "-fx-border-color: #E1E5E9; -fx-border-width: 1 0 0 0;");
+
+        // Estado de la base de datos
+        HBox dbStatusContainer = new HBox(8);
+        dbStatusContainer.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon dbIcon = new FontIcon(FontAwesomeSolid.DATABASE);
+        dbIcon.setIconSize(14);
+        dbIcon.setIconColor(Color.web(SUCCESS_COLOR));
+
+        dbStatusLabel = new Label("Base de Datos: Conectada");
+        dbStatusLabel.setStyle("-fx-text-fill: " + SUCCESS_COLOR + "; -fx-font-weight: bold; -fx-font-size: 12px;");
+
+        dbStatusContainer.getChildren().addAll(dbIcon, dbStatusLabel);
+
+        // Última actualización
+        HBox updateContainer = new HBox(8);
+        updateContainer.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon updateIcon = new FontIcon(FontAwesomeSolid.SYNC_ALT);
+        updateIcon.setIconSize(14);
+        updateIcon.setIconColor(Color.web(INFO_COLOR));
+
+        lastUpdateLabel = new Label("Actualizado: " +
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+        lastUpdateLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-size: 12px;");
+
+        updateContainer.getChildren().addAll(updateIcon, lastUpdateLabel);
+
+        // Información del sistema
+        HBox systemInfo = new HBox(8);
+        systemInfo.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon systemIcon = new FontIcon(FontAwesomeSolid.MICROCHIP);
+        systemIcon.setIconSize(14);
+        systemIcon.setIconColor(Color.web(TEXT_SECONDARY));
+
+        Label systemLabel = new Label("Sistema v2.1.0 | Java " + System.getProperty("java.version"));
+        systemLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-size: 12px;");
+
+        systemInfo.getChildren().addAll(systemIcon, systemLabel);
+
+        Region spacer1 = new Region();
+        Region spacer2 = new Region();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+        statusBar.getChildren().addAll(
+                dbStatusContainer, spacer1,
+                updateContainer, spacer2,
+                systemInfo
+        );
+
+        return statusBar;
+    }
+
+    private VBox createEnhancedUserProfileSection() {
+        VBox container = new VBox();
+        container.setStyle("-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2196F3, #1976D2);");
+        container.setPadding(new Insets(30, 20, 30, 20));
+
+        // Avatar con mejor diseño
+        StackPane avatarContainer = new StackPane();
+
+        ImageView avatarView = new ImageView(avatar);
+        avatarView.setFitWidth(80);
+        avatarView.setFitHeight(80);
+
+        Circle clip = new Circle(40, 40, 40);
+        avatarView.setClip(clip);
+
+        Circle border = new Circle(40, 40, 42);
+        border.setFill(Color.TRANSPARENT);
+        border.setStroke(Color.WHITE);
+        border.setStrokeWidth(3);
+
+        avatarContainer.getChildren().addAll(avatarView, border);
+        avatarContainer.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.3)));
+
+        // Información del usuario
+        Label usernameLabel = new Label(username);
+        usernameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+        HBox roleContainer = new HBox(8);
+        roleContainer.setAlignment(Pos.CENTER);
+
+        FontIcon roleIcon = new FontIcon(role.equalsIgnoreCase("admin") ?
+                FontAwesomeSolid.CROWN : FontAwesomeSolid.USER_TIE);
+        roleIcon.setIconSize(14);
+        roleIcon.setIconColor(Color.WHITE);
+
+        Label roleLabel = new Label(role.toUpperCase());
+        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9); -fx-font-weight: bold;");
+
+        roleContainer.getChildren().addAll(roleIcon, roleLabel);
+
+        // Indicador de estado mejorado
+        HBox statusBox = new HBox(8);
+        statusBox.setAlignment(Pos.CENTER);
+
+        Circle statusIndicator = new Circle(6, Color.web("#4CAF50"));
+        statusIndicator.setEffect(new DropShadow(5, Color.web("#4CAF50")));
+
+        Label statusLabel = new Label("En línea");
+        statusLabel.setStyle("-fx-text-fill: rgba(255,255,255,0.9); -fx-font-size: 13px;");
+
+        statusBox.getChildren().addAll(statusIndicator, statusLabel);
+
+        VBox userInfo = new VBox(10, avatarContainer, usernameLabel, roleContainer, statusBox);
+        userInfo.setAlignment(Pos.CENTER);
+
+        container.getChildren().add(userInfo);
+        return container;
+    }
+
+    private JFXButton createEnhancedMenuButton(String text, FontIcon icon, String shortcut) {
+        icon.setIconSize(18);
+        icon.setIconColor(Color.web("#B0BEC5"));
+
+        JFXButton button = new JFXButton(text, icon);
+        button.getStyleClass().add("enhanced-menu-button");
+        button.setMaxWidth(Double.MAX_VALUE);
+        button.setAlignment(Pos.CENTER_LEFT);
+        button.setPadding(new Insets(12, 20, 12, 20));
+        button.setGraphicTextGap(15);
+        button.setStyle("-fx-font-size: 14px; -fx-text-fill: #B0BEC5;");
+
+        // Tooltip con atajo
+        Tooltip tooltip = new Tooltip(text + " (" + shortcut + ")");
+        button.setTooltip(tooltip);
+
+        // Efectos mejorados
+        button.setOnMouseEntered(e -> {
+            if (!button.getStyleClass().contains("active-menu-button")) {
+                button.setStyle("-fx-background-color: rgba(255,255,255,0.1); " +
+                        "-fx-background-radius: 8px; -fx-font-size: 14px; -fx-text-fill: white;");
+                icon.setIconColor(Color.WHITE);
+                new FadeIn(button).setSpeed(3).play();
+            }
+        });
+
+        button.setOnMouseExited(e -> {
+            if (!button.getStyleClass().contains("active-menu-button")) {
+                button.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-text-fill: #B0BEC5;");
+                icon.setIconColor(Color.web("#B0BEC5"));
+            }
+        });
+
+        return button;
+    }
+
+    private void setupMenuButtonEvents() {
         dashboardButton.setOnAction(e -> {
             setActiveButton(dashboardButton);
             showDashboard();
@@ -470,185 +858,153 @@ public class MainWindow {
 
         inventoryButton.setOnAction(e -> {
             setActiveButton(inventoryButton);
-            try {
-                Connection connection = DatabaseManager.connect();
-                InventarioDAO inventarioDAO = new InventarioSQLiteDAO(connection);
-                InventarioService inventarioService = new InventarioService(inventarioDAO);
-                InventarioController inventarioController = new InventarioController(inventarioService);
-                InventarioView inventarioView = new InventarioView(inventarioController);
-
-                setContent(inventarioView.getView());
-            } catch (SQLException ex) {
-                System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
-            }
+            loadInventoryModule();
         });
 
         loansButton.setOnAction(e -> {
             setActiveButton(loansButton);
-            try {
-                Connection connection = DatabaseManager.connect();
-                PrestamoDAO prestamoDAO = new PrestamoSQLiteDAO(connection);
-                PrestamoService prestamoService = new PrestamoService(prestamoDAO);
-                PrestamoController prestamoController = new PrestamoController(prestamoService);
-                PrestamoView prestamoView = new PrestamoView(prestamoController);
-
-                setContent(prestamoView.getView());
-            } catch (SQLException ex) {
-                System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
-            }
+            loadLoansModule();
         });
 
-        // Configurar visibilidad según el rol
-        if (!"admin".equalsIgnoreCase(role)) {
-            // Ocultar módulos sensibles para empleados
-            usersButton.setVisible(false);
-            usersButton.setManaged(false);
-            reportsButton.setVisible(false);
-            reportsButton.setManaged(false);
-            departamentosButton.setManaged(false);
-            departamentosButton.setVisible(false);
-            settingsButton.setVisible(false);
-            settingsButton.setManaged(false);
-        } else {
-            // Configurar acciones para admin
-            usersButton.setOnAction(e -> checkAdminAccess(() -> {
+        if ("admin".equalsIgnoreCase(role)) {
+            usersButton.setOnAction(e -> {
                 setActiveButton(usersButton);
-                try {
-                    Connection connection = DatabaseManager.connect();
-                    UserDAO userDAO = new UserSQLiteDAO(connection);
-                    UserService userService = new UserService(userDAO);
-                    UserController userController = new UserController(userService);
-                    UserListView userListView = new UserListView(userController);
-                    setContent(userListView);
-
-                } catch (SQLException ex) {
-                    System.err.println("Error de conexión: " + ex.getMessage());
-                    AlertUtils.showError("Error", "No se pudo conectar a la base de datos");
-                } catch (Exception ex) {
-                    System.err.println("Error al cargar módulo: " + ex.getMessage());
-                    AlertUtils.showError("Error", "No se pudo cargar el módulo de usuarios");
-                }
-            }));
-            departamentosButton.setOnAction(e -> {
-                setActiveButton(departamentosButton);
-                try {
-                    Connection connection = DatabaseManager.connect();
-                    DepartamentoDAO departamentoDAO = new DepartamentoSQLiteDAO(connection);
-                    DepartamentoService departamentoService = new DepartamentoService(departamentoDAO);
-                    DepartamentoController departamentoController = new DepartamentoController(departamentoService);
-                    DepartamentoView departamentoView = new DepartamentoView(departamentoController);
-
-                    setContent(departamentoView.getView());
-                } catch (SQLException ex) {
-                    System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
-                }
+                loadUsersModule();
             });
 
-            reportsButton.setOnAction(e -> checkAdminAccess(() -> {
+            departamentosButton.setOnAction(e -> {
+                setActiveButton(departamentosButton);
+                loadDepartamentosModule();
+            });
+
+            reportsButton.setOnAction(e -> {
                 setActiveButton(reportsButton);
                 showPlaceholder("Módulo de Reportes");
-            }));
-
-            settingsButton.setOnAction(e -> checkAdminAccess(() -> {
-                setActiveButton(settingsButton);
-                try {
-                    Connection connection = DatabaseManager.connect();
-                    ConfiguracionDAO configuracionDAO = new ConfiguracionSQLiteDAO(connection);
-                    ConfiguracionService configuracionService = new ConfiguracionService(configuracionDAO);
-                    ConfiguracionController configuracionController = new ConfiguracionController(configuracionService);
-                    ConfiguracionView configuracionView = new ConfiguracionView(configuracionController);
-
-                    setContent(configuracionView.getView());
-                } catch (SQLException ex) {
-                    System.err.println("No se pudo conectar a la base de datos: " + ex.getMessage());
-                }
-            }));
+            });
         }
 
         helpButton.setOnAction(e -> {
             setActiveButton(helpButton);
             showPlaceholder("Módulo de Ayuda");
         });
+    }
+    // Métodos de carga de módulos
+    private void loadInventoryModule() {
+        try {
+            Connection connection = DatabaseManager.connect();
+            InventarioDAO inventarioDAO = new InventarioSQLiteDAO(connection);
+            InventarioService inventarioService = new InventarioService(inventarioDAO);
+            InventarioController inventarioController = new InventarioController(inventarioService);
+            InventarioView inventarioView = new InventarioView(inventarioController);
+            setContent(inventarioView.getView());
+        } catch (SQLException ex) {
+            AlertUtils.showError("Error", "No se pudo conectar a la base de datos: " + ex.getMessage());
+        }
+    }
 
-        // Botón de cerrar sesión mejorado
+    private void loadLoansModule() {
+        try {
+            Connection connection = DatabaseManager.connect();
+            PrestamoDAO prestamoDAO = new PrestamoSQLiteDAO(connection);
+            PrestamoService prestamoService = new PrestamoService(prestamoDAO);
+            PrestamoController prestamoController = new PrestamoController(prestamoService);
+            PrestamoView prestamoView = new PrestamoView(prestamoController);
+            setContent(prestamoView.getView());
+        } catch (SQLException ex) {
+            AlertUtils.showError("Error", "No se pudo conectar a la base de datos: " + ex.getMessage());
+        }
+    }
+
+    private void loadUsersModule() {
+        try {
+            Connection connection = DatabaseManager.connect();
+            UserDAO userDAO = new UserSQLiteDAO(connection);
+            UserService userService = new UserService(userDAO);
+            UserController userController = new UserController(userService);
+            UserListView userListView = new UserListView(userController);
+            setContent(userListView);
+        } catch (SQLException ex) {
+            AlertUtils.showError("Error", "No se pudo conectar a la base de datos: " + ex.getMessage());
+        }
+    }
+
+    private void loadDepartamentosModule() {
+        try {
+            Connection connection = DatabaseManager.connect();
+            DepartamentoDAO departamentoDAO = new DepartamentoSQLiteDAO();
+            DepartamentoHistorialDAO historialDAO = new DepartamentoHistorialSQLiteDAO();
+
+            // Services
+            DepartamentoService departamentoService = new DepartamentoService(departamentoDAO);
+            DepartamentoHistorialService historialService = new DepartamentoHistorialService(historialDAO);
+
+            // Controller con ambos services
+            DepartamentoController departamentoController =
+                    new DepartamentoController(departamentoService, historialService);
+
+            // Vista
+            DepartamentoView departamentoView = new DepartamentoView(departamentoController);
+            setContent(departamentoView.getView());
+
+        } catch (SQLException ex) {
+            AlertUtils.showError("Error",
+                    "No se pudo conectar a la base de datos: " + ex.getMessage());
+        }
+    }
+
+
+    private void loadSettingsModule() {
+        try {
+            Connection connection = DatabaseManager.connect();
+            ConfiguracionDAO configuracionDAO = new ConfiguracionSQLiteDAO(connection);
+            ConfiguracionService configuracionService = new ConfiguracionService(configuracionDAO);
+            ConfiguracionController configuracionController = new ConfiguracionController(configuracionService);
+            ConfiguracionView configuracionView = new ConfiguracionView(configuracionController);
+            setContent(configuracionView.getView());
+        } catch (SQLException ex) {
+            AlertUtils.showError("Error", "No se pudo conectar a la base de datos: " + ex.getMessage());
+        }
+    }
+    private JFXButton createLogoutButton() {
         FontIcon logoutIcon = new FontIcon(FontAwesomeSolid.SIGN_OUT_ALT);
         logoutIcon.setIconColor(Color.WHITE);
+
         JFXButton logoutButton = new JFXButton("Cerrar Sesión", logoutIcon);
-        logoutButton.getStyleClass().add("logout-button");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setButtonType(JFXButton.ButtonType.RAISED);
-        logoutButton.setStyle("-fx-background-color: " + ERROR_COLOR + "; -fx-text-fill: white; -fx-font-weight: bold;");
-        logoutButton.setPadding(new Insets(12, 15, 12, 15)); // Más padding
+        logoutButton.setStyle("-fx-background-color: " + ERROR_COLOR + "; " +
+                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
+        logoutButton.setPadding(new Insets(15, 20, 15, 20));
 
         logoutButton.setOnAction(e -> {
             new FadeOut(root).setSpeed(2).play();
-            stage.close();
+            Timeline delay = new Timeline(new KeyFrame(Duration.millis(500), event -> stage.close()));
+            delay.play();
         });
 
-        // Contenedor de botones del menú con más espaciado
-        VBox menuButtons = new VBox(8, // Aumentar espaciado entre botones
-                dashboardButton,
-                inventoryButton,
-                loansButton
-        );
-
-        // Solo añadir estos botones si es admin
-        if ("admin".equalsIgnoreCase(role)) {
-            menuButtons.getChildren().addAll(
-                    usersButton,
-                    departamentosButton,
-                    reportsButton,
-                    settingsButton
-            );
-        }
-
-        // Añadir botones comunes
-        menuButtons.getChildren().addAll(
-                helpButton
-        );
-
-        menuButtons.setPadding(new Insets(20, 15, 20, 15)); // Más padding general
-
-        // Información de versión con estilo
-        HBox versionBox = new HBox(8);
-        versionBox.setAlignment(Pos.CENTER);
-
-        FontIcon infoIcon = new FontIcon(FontAwesomeSolid.INFO_CIRCLE);
-        infoIcon.setIconColor(Color.web(TEXT_SECONDARY));
-        infoIcon.setIconSize(12);
-
-        Label versionLabel = new Label("v1.0.1 ALPHA");
-        versionLabel.getStyleClass().add("version-label");
-        versionLabel.setStyle("-fx-text-fill: " + TEXT_SECONDARY + "; -fx-font-size: 12px;");
-
-        versionBox.getChildren().addAll(infoIcon, versionLabel);
-        versionBox.setPadding(new Insets(10, 0, 10, 0));
-
-        // Layout completo del sidebar
-        VBox sidebar = new VBox(0,
-                userProfileSection,
-                menuButtons,
-                new Region(), // Espacio flexible
-                versionBox,
-                logoutButton
-        );
-
-        sidebar.getStyleClass().add("sidebar");
-        sidebar.setStyle("-fx-background-color: " + CARD_COLOR_DARKER + ";"); // Color más oscuro para mejor contraste
-        sidebar.setMinWidth(220); // Ancho mínimo mayor
-        sidebar.setPrefWidth(220);
-        // Hacer que los botones del menú ocupen el espacio disponible
-        VBox.setVgrow(menuButtons, Priority.ALWAYS);
-
-        return sidebar;
+        return logoutButton;
     }
 
-    private void checkAdminAccess(Runnable action) {
-        if ("admin".equalsIgnoreCase(role)) {
-            action.run();
-        } else {
-            showAccessDeniedMessage();
-        }
+    private VBox createVersionInfo() {
+        VBox versionContainer = new VBox(8);
+        versionContainer.setAlignment(Pos.CENTER);
+        versionContainer.setPadding(new Insets(15, 0, 15, 0));
+
+        FontIcon infoIcon = new FontIcon(FontAwesomeSolid.INFO_CIRCLE);
+        infoIcon.setIconColor(Color.web("#546E7A"));
+        infoIcon.setIconSize(14);
+
+        Label versionLabel = new Label("Sistema v2.1.0");
+        versionLabel.setStyle("-fx-text-fill: #546E7A; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        Label buildLabel = new Label("Build 2024.01.15");
+        buildLabel.setStyle("-fx-text-fill: #546E7A; -fx-font-size: 10px;");
+
+        HBox versionBox = new HBox(8, infoIcon, versionLabel);
+        versionBox.setAlignment(Pos.CENTER);
+
+        versionContainer.getChildren().addAll(versionBox, buildLabel);
+        return versionContainer;
     }
 
     private void showAccessDeniedMessage() {
@@ -675,38 +1031,6 @@ public class MainWindow {
         new Shake(messageBox).play();
     }
 
-    private JFXButton createMenuButton(String text, FontIcon icon) {
-        icon.setIconSize(20); // Íconos más grandes
-        icon.setIconColor(Color.web(TEXT_PRIMARY)); // Color más oscuro para mejor contraste
-
-        JFXButton button = new JFXButton(text, icon);
-        button.getStyleClass().add("menu-button");
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setAlignment(Pos.CENTER_LEFT);
-        button.setPadding(new Insets(15, 20, 15, 20)); // Más padding
-        button.setGraphicTextGap(20); // Más espacio entre ícono y texto
-        button.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;"); // Texto más grande y en negrita
-
-        // Efecto ripple materializado
-        button.setRipplerFill(Color.web(PRIMARY_COLOR, 0.4)); // Efecto más visible
-
-        // Efectos de hover más pronunciados
-        button.setOnMouseEntered(e -> {
-            if (!button.getStyleClass().contains("active-menu-button")) {
-                button.setStyle("-fx-background-color: rgba(0,0,0,0.1); -fx-font-size: 14px; -fx-font-weight: bold;");
-                icon.setIconColor(Color.web(PRIMARY_COLOR)); // Cambiar color del ícono al hacer hover
-            }
-        });
-
-        button.setOnMouseExited(e -> {
-            if (!button.getStyleClass().contains("active-menu-button")) {
-                button.setStyle("-fx-background-color: transparent; -fx-font-size: 14px; -fx-font-weight: bold;");
-                icon.setIconColor(Color.web(TEXT_PRIMARY)); // Restaurar color del ícono
-            }
-        });
-
-        return button;
-    }
     private void setupAutoRefresh() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.minutes(5), e -> refreshData()));
         timeline.setCycleCount(Animation.INDEFINITE);
@@ -721,7 +1045,7 @@ public class MainWindow {
     private void setActiveButton(JFXButton activeButton) {
         // Remover clase activa y restaurar color de icono en todos los botones
         for (JFXButton button : new JFXButton[]{dashboardButton, inventoryButton, loansButton,
-                usersButton,departamentosButton, reportsButton, settingsButton, helpButton}) {
+                usersButton,departamentosButton, reportsButton, helpButton}) {
             if (button != null) {
                 button.getStyleClass().remove("active-menu-button");
                 button.setStyle("-fx-background-color: transparent;");
@@ -794,10 +1118,11 @@ public class MainWindow {
         try (Connection conn = DatabaseManager.connect()) {
             InventarioDAO inventarioDAO = new InventarioSQLiteDAO(conn);
             UserDAO userDAO = new UserSQLiteDAO(conn);
+            PrestamoDAO prestamoDAO = new PrestamoSQLiteDAO(conn);
 
             int totalItems = inventarioDAO.obtenerTodosLosEquipos().size();
-            int activeLoans = 0; // Implementar en PrestamoDAO
-            int overdueLoans = 0; // Implementar en PrestamoDAO
+            int activeLoans = prestamoDAO.obtenerPrestamosActivos().size();
+            int overdueLoans = prestamoDAO.obtenerTodosLosPrestamos().size();
             int totalUsers = userDAO.getAllUsers().size();
 
             VBox inventoryStats = createStatCard(
@@ -817,7 +1142,7 @@ public class MainWindow {
             );
 
             VBox overdueLoansCard = createStatCard(
-                    "Préstamos Vencidos",
+                    "Préstamos Total",
                     String.valueOf(overdueLoans),
                     ERROR_COLOR,
                     new FontIcon(FontAwesomeSolid.EXCLAMATION_TRIANGLE),

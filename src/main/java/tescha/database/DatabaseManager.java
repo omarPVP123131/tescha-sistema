@@ -57,13 +57,30 @@ public class DatabaseManager {
 
                 // Departamentos
                 """
-            CREATE TABLE IF NOT EXISTS departamentos (
-                id INTEGER PRIMARY KEY,
-                nombre TEXT UNIQUE NOT NULL,
-                descripcion TEXT
-            )
+CREATE TABLE IF NOT EXISTS departamentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT UNIQUE NOT NULL,
+    descripcion TEXT,
+    estado TEXT DEFAULT 'Activo',
+    fecha TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
             """,
 
+                """
+CREATE TABLE IF NOT EXISTS departamentos_historial (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    departamento_id INTEGER NOT NULL,
+    nombre TEXT,
+    descripcion TEXT,
+    estado TEXT,
+    fecha_cambio TEXT DEFAULT CURRENT_TIMESTAMP,
+    usuario TEXT,
+    accion TEXT NOT NULL,
+    FOREIGN KEY (departamento_id) REFERENCES departamentos(id)
+);
+
+""",
                 // Categorías de inventario
                 """
             CREATE TABLE IF NOT EXISTS categorias (
@@ -95,31 +112,38 @@ public class DatabaseManager {
         )
         """,
 
+                """
+CREATE TABLE IF NOT EXISTS clientes (
+    id INTEGER PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    imagen_credencial TEXT,
+    descripcion TEXT
+)
+""",
                 // Préstamos: FK a usuarios e inventario
                 """
-            CREATE TABLE IF NOT EXISTS prestamos (
-                id INTEGER PRIMARY KEY,
-                fecha TEXT,
-                hora TEXT,
-                fecha_devolucion TEXT,
-                solicitante_id INTEGER,
-                id_equipo INTEGER,
-                cantidad INTEGER DEFAULT 1,
-                comentarios TEXT,
-                condiciones TEXT,
-                entrega TEXT,
-                entregado_por TEXT,
-                devuelto INTEGER DEFAULT 0,
-                fecha_devuelto TEXT,
-                hora_devuelto TEXT,
-                devuelto_por TEXT,
-                recibido_por TEXT,
-                estado_devuelto TEXT,
-                tipo_entrega TEXT DEFAULT 'manual',
-                FOREIGN KEY(solicitante_id) REFERENCES usuarios(id),
-                FOREIGN KEY(id_equipo) REFERENCES inventario(id)
-            )
+CREATE TABLE IF NOT EXISTS prestamos (
+                 id INTEGER PRIMARY KEY,
+                 fecha_prestamo TEXT,
+                 solicitante TEXT,
+                 devuelto INTEGER DEFAULT 0,
+                 fecha_devuelto TEXT,
+                 comentarios TEXT
+)
+        
+             
             """,
+
+                """
+CREATE TABLE IF NOT EXISTS prestamos_detalle (
+    id INTEGER PRIMARY KEY,
+    prestamo_id INTEGER,
+    id_equipo INTEGER,
+    cantidad INTEGER DEFAULT 1,
+    FOREIGN KEY(prestamo_id) REFERENCES prestamos(id),
+    FOREIGN KEY(id_equipo) REFERENCES inventario(id)
+)
+""",
 
                 // Historial de movimientos: FK a inventario
                 """
@@ -180,9 +204,9 @@ public class DatabaseManager {
     private static void insertDefaultData() {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("""
-                INSERT OR IGNORE INTO usuarios (username, password, nombre, rol)
-                VALUES ('admin', '1234', 'Administrador', 'admin')
-            """);
+                        INSERT OR IGNORE INTO usuarios (username, password, nombre, rol)
+                        VALUES ('admin', '1234', 'Administrador', 'admin')
+                    """);
         } catch (SQLException e) {
             System.err.println("Error inserting default data: " + e.getMessage());
         }

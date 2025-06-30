@@ -1,11 +1,25 @@
 package tescha.departamento.view;
 
+import io.github.palexdev.materialfx.enums.NotificationPos;
+import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.util.StringConverter;
+import tescha.database.DatabaseManager;
 import tescha.departamento.controller.DepartamentoController;
 import tescha.departamento.dto.DepartamentoDTO;
+import tescha.departamento.view.components.DepartamentoViewComponents;
+import tescha.departamento.view.services.DepartamentoExportService;
+import tescha.departamento.view.animations.DepartamentoViewAnimations;
+import tescha.departamento.view.styles.DepartamentoViewStyles;
 import tescha.Components.AlertUtils;
-
+import animatefx.animation.*;
 import com.jfoenix.controls.*;
-import com.jfoenix.effects.JFXDepthManager;
 import javafx.animation.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,548 +27,841 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.effect.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.controlsfx.control.NotificationPane;
 import org.controlsfx.control.textfield.CustomTextField;
-import org.controlsfx.glyphfont.Glyph;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.javafx.FontIcon;
 
-// Importar AnimateFX
-import animatefx.animation.*;
-
+import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class DepartamentoView {
-    private DepartamentoController controller;
-    private BorderPane view;
-    private NotificationPane notificationPane;
 
-    private TableView<DepartamentoDTO> table;
+    // Servicios y componentes
+    private final DepartamentoController controller;
+    private final DepartamentoViewComponents components;
+    private final DepartamentoExportService exportService;
+    private final DepartamentoViewAnimations animations;
+    private final DepartamentoViewStyles styles;
+
+    // Datos y estado
     private ObservableList<DepartamentoDTO> departamentos;
+    private ObservableList<DepartamentoDTO> filteredDepartamentos;
+    private DepartamentoDTO selectedDepartamento;
+    private boolean isEditMode = false;
 
+    // Componentes UI principales
+    private BorderPane view;
+    private TableView<DepartamentoDTO> table;
     private CustomTextField nombreField;
+    private CustomTextField searchField;
     private JFXTextArea descripcionField;
+    private JFXDatePicker fechaCreacionPicker;
+    private JFXComboBox<String> estadoComboBox;
+
+
+    // Botones
     private JFXButton agregarBtn;
     private JFXButton actualizarBtn;
     private JFXButton eliminarBtn;
     private JFXButton limpiarBtn;
+    private JFXButton refreshBtn;
+    private JFXButton exportBtn;
+    private JFXButton importBtn;
+    private JFXButton reportBtn;
+    private JFXButton configBtn;
 
-    // Contenedores para animaciones
+    // Paneles
     private VBox leftPanel;
     private VBox rightPanel;
-    private GridPane form;
-    private HBox buttonBox;
+    private HBox toolbarBox;
+    private VBox statsPanel;
+
+    // Indicadores y estado
+    private Label statusLabel;
+    private ProgressIndicator loadingIndicator;
+    private Label countLabel;
+    private Label statsLabel;
+
+    // Configuración de teclado
+    private final KeyCodeCombination[] shortcuts = {
+            new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN), // Nuevo
+            new KeyCodeCombination(KeyCode.U, KeyCombination.CONTROL_DOWN), // Actualizar
+            new KeyCodeCombination(KeyCode.DELETE), // Eliminar
+            new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN), // Limpiar
+            new KeyCodeCombination(KeyCode.F5), // Refrescar
+            new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN), // Buscar
+            new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN), // Exportar
+            new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN), // Importar
+    };
 
     public DepartamentoView(DepartamentoController controller) {
         this.controller = controller;
+        this.components = new DepartamentoViewComponents();
+        this.exportService = new DepartamentoExportService();
+        this.animations = new DepartamentoViewAnimations();
+        this.styles = new DepartamentoViewStyles();
+
+        initializeData();
         initializeUI();
-        loadData();
-        setupListeners();
-        setupAnimations();
+        setupEventHandlers();
+        setupKeyboardShortcuts();
+        loadInitialData();
+    }
+
+    private void initializeData() {
+        departamentos = FXCollections.observableArrayList();
+        filteredDepartamentos = FXCollections.observableArrayList();
     }
 
     private void initializeUI() {
         view = new BorderPane();
+        applyMainStyles();
 
-        // Crear NotificationPane para mensajes elegantes
-        notificationPane = new NotificationPane();
+        createComponents();
+        createToolbar();
+        createTable();
+        createFormPanel();
+        createStatsPanel();
+        createStatusBar();
+        setupLayout();
 
-        // Fondo degradado espectacular
-        setupGradientBackground();
-
-        // Crear tabla con efectos
-        createEnhancedTable();
-
-        // Crear formulario con animaciones
-        createEnhancedForm();
-
-        // Crear botones con efectos hover
-        createEnhancedButtons();
-
-        // Diseño principal con efectos de profundidad
-        setupMainLayout();
+        animations.initializeAnimations(view);
     }
 
-    private void setupGradientBackground() {
-        // Fondo degradado dinámico
-        Stop[] stops = new Stop[] {
-                new Stop(0, Color.web("#667eea")),
-                new Stop(0.5, Color.web("#764ba2")),
-                new Stop(1, Color.web("#f093fb"))
-        };
-        LinearGradient gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE, stops);
-
-        Rectangle background = new Rectangle();
-        background.setFill(gradient);
-        background.widthProperty().bind(view.widthProperty());
-        background.heightProperty().bind(view.heightProperty());
-
-        // Animación de gradiente
-        Timeline colorAnimation = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                        new KeyValue(background.fillProperty(), gradient)
-                ),
-                new KeyFrame(Duration.seconds(5),
-                        new KeyValue(background.fillProperty(),
-                                new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
-                                        new Stop(0, Color.web("#f093fb")),
-                                        new Stop(0.5, Color.web("#f5576c")),
-                                        new Stop(1, Color.web("#4facfe"))
-                                )
-                        )
-                )
-        );
-        colorAnimation.setCycleCount(Timeline.INDEFINITE);
-        colorAnimation.setAutoReverse(true);
-        colorAnimation.play();
-
-        view.getChildren().add(background);
-        background.toBack();
+    private void applyMainStyles() {
+        view.setBackground(styles.createGradientBackground());
+        view.setStyle(styles.getMainContainerStyle());
     }
 
-    private void createEnhancedTable() {
-        table = new TableView<>();
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    private void createComponents() {
+        // Primero crea los campos del formulario
+        createFormFields();
 
-        // Estilo glassmorphism para la tabla
-        table.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.1);" +
-                        "-fx-background-radius: 15;" +
-                        "-fx-border-color: rgba(255, 255, 255, 0.2);" +
-                        "-fx-border-width: 1;" +
-                        "-fx-border-radius: 15;"
-        );
+        // Luego los botones (que podrían depender de los campos)
+        createButtons();
 
-        // Efecto de cristal
-        BoxBlur blur = new BoxBlur(3, 3, 1);
-        table.setEffect(blur);
+        // Después los indicadores
+        createIndicators();
 
-        // Columnas con iconos
-        TableColumn<DepartamentoDTO, Integer> idCol = new TableColumn<>();
-        Label idHeader = new Label("ID");
-        idHeader.setGraphic(new FontIcon(FontAwesomeSolid.HASHTAG));
-        idHeader.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        idCol.setGraphic(idHeader);
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setStyle("-fx-alignment: CENTER;");
+        // Finalmente los paneles (que contienen los otros componentes)
+        createPanels();
+    }
 
-        TableColumn<DepartamentoDTO, String> nombreCol = new TableColumn<>();
-        Label nombreHeader = new Label("Nombre");
-        nombreHeader.setGraphic(new FontIcon(FontAwesomeSolid.BUILDING));
-        nombreHeader.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        nombreCol.setGraphic(nombreHeader);
-        nombreCol.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+    private void createFormFields() {
+        // Campo nombre con validación mejorada
+        nombreField = components.createStyledTextField("Nombre del departamento", FontAwesomeSolid.BUILDING);
 
-        TableColumn<DepartamentoDTO, String> descCol = new TableColumn<>();
-        Label descHeader = new Label("Descripción");
-        descHeader.setGraphic(new FontIcon(FontAwesomeSolid.INFO_CIRCLE));
-        descHeader.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        descCol.setGraphic(descHeader);
-        descCol.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+        // Campo descripción expandido
+        descripcionField = components.createStyledTextArea("Descripción detallada", 4);
 
-        table.getColumns().addAll(idCol, nombreCol, descCol);
+        // 1. Primero inicializa el JFXDatePicker
+        fechaCreacionPicker = new JFXDatePicker(LocalDate.now()); // Inicializar con fecha actual
 
-        // Efecto de hover en filas
-        table.setRowFactory(tv -> {
-            TableRow<DepartamentoDTO> row = new TableRow<>();
-            row.setOnMouseEntered(e -> {
-                if (!row.isEmpty()) {
-                    new Pulse(row).play();
-                    row.setStyle("-fx-background-color: rgba(255, 255, 255, 0.2);");
+        // 2. Configura las propiedades básicas
+        fechaCreacionPicker.setPromptText("Fecha de creación");
+        fechaCreacionPicker.setDefaultColor(Color.valueOf("#3f51b5"));
+
+        // 3. Ahora configura el converter (ya no será null)
+        fechaCreacionPicker.setConverter(new StringConverter<LocalDate>() {
+            final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            public String toString(LocalDate date) {
+                return (date != null) ? dateFormatter.format(date) : dateFormatter.format(LocalDate.now());
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                try {
+                    return (string != null && !string.isEmpty())
+                            ? LocalDate.parse(string, dateFormatter)
+                            : LocalDate.now(); // Siempre devolver fecha actual si es nulo
+                } catch (Exception e) {
+                    return LocalDate.now(); // Valor por defecto si hay error de parsing
                 }
-            });
-            row.setOnMouseExited(e -> {
-                row.setStyle("");
-            });
-            return row;
+            }
         });
+
+        // Listener para evitar valores nulos
+        fechaCreacionPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                Platform.runLater(() -> fechaCreacionPicker.setValue(LocalDate.now()));
+            }
+        });
+
+        estadoComboBox = components.createComboBox("Estado",
+                List.of("Activo", "Inactivo", "En revisión", "Suspendido"));
+
+        // Campo de búsqueda mejorado
+        searchField = components.createSearchField("Buscar departamentos...");
+
+        setupFieldValidations();
     }
 
-    private void createEnhancedForm() {
-        form = new GridPane();
-        form.setVgap(20);
-        form.setHgap(20);
-        form.setPadding(new Insets(30));
+    private void createButtons() {
+        // Botones principales
+        agregarBtn = components.createActionButton("Agregar", FontAwesomeSolid.PLUS,
+                styles.SUCCESS_COLOR, "Ctrl+N");
+        actualizarBtn = components.createActionButton("Actualizar", FontAwesomeSolid.EDIT,
+                styles.PRIMARY_COLOR, "Ctrl+U");
+        eliminarBtn = components.createActionButton("Eliminar", FontAwesomeSolid.TRASH_ALT,
+                styles.DANGER_COLOR, "Delete");
+        limpiarBtn = components.createActionButton("Limpiar", FontAwesomeSolid.BROOM,
+                styles.GRAY_COLOR, "Ctrl+R");
 
-        // Fondo glassmorphism para el formulario
-        form.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.15);" +
-                        "-fx-background-radius: 20;" +
-                        "-fx-border-color: rgba(255, 255, 255, 0.3);" +
-                        "-fx-border-width: 1;" +
-                        "-fx-border-radius: 20;"
+        // Botones de toolbar
+        refreshBtn = components.createToolbarButton("Refrescar", FontAwesomeSolid.SYNC_ALT, "F5");
+        exportBtn = components.createToolbarButton("Exportar", FontAwesomeSolid.DOWNLOAD, "Ctrl+E");
+        importBtn = components.createToolbarButton("Importar", FontAwesomeSolid.UPLOAD, "Ctrl+I");
+        reportBtn = components.createToolbarButton("Reportes", FontAwesomeSolid.CHART_BAR, "Ctrl+R");
+        configBtn = components.createToolbarButton("Configuración", FontAwesomeSolid.COG, "Ctrl+,");
+
+        setupButtonStates();
+    }
+
+    private void createIndicators() {
+        loadingIndicator = components.createLoadingIndicator();
+        statusLabel = components.createStatusLabel();
+        countLabel = components.createCountLabel();
+        statsLabel = components.createStatsLabel();
+    }
+
+    private void createPanels() {
+        leftPanel = new VBox();
+        rightPanel = new VBox();
+        statsPanel = createStatsPanel();
+    }
+
+    private void createToolbar() {
+        toolbarBox = components.createToolbar(
+                searchField, refreshBtn, exportBtn, importBtn,
+                reportBtn, configBtn
+        );
+    }
+
+    private void createTable() {
+        table = components.createDepartamentoTable();
+        setupTableColumns();
+        setupTableBehavior();
+    }
+
+    private void setupTableColumns() {
+        // Columna ID con indicador
+        TableColumn<DepartamentoDTO, Integer> idCol = components.createIdColumn();
+
+        // Columna Nombre con validación visual
+        TableColumn<DepartamentoDTO, String> nombreCol = components.createNombreColumn();
+
+        // Columna Descripción con tooltip
+        TableColumn<DepartamentoDTO, String> descCol = components.createDescripcionColumn();
+
+        // Nueva columna Estado con colores
+        TableColumn<DepartamentoDTO, String> estadoCol = components.createEstadoColumn();
+
+
+        // Nueva columna Fecha
+        TableColumn<DepartamentoDTO, LocalDateTime> fechaCol = components.createFechaColumn();
+
+        // Columna de acciones mejorada
+        TableColumn<DepartamentoDTO, Void> actionCol = components.createActionColumn(
+                this::selectDepartamento, this::eliminarDepartamento, this::duplicarDepartamento
         );
 
-        // Efecto de profundidad
-        JFXDepthManager.setDepth(form, 4);
+        table.getColumns().addAll(idCol, nombreCol, descCol, estadoCol,
+             fechaCol, actionCol);
+    }
 
-        // Campo nombre con icono
-        nombreField = new CustomTextField();
-        nombreField.setPromptText("Nombre del departamento");
-        nombreField.setLeft(new FontIcon(FontAwesomeSolid.BUILDING));
-        nombreField.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.9);" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-border-radius: 10;" +
-                        "-fx-font-size: 14;" +
-                        "-fx-padding: 15;"
+    private void createFormPanel() {
+        rightPanel = components.createFormPanel(
+                nombreField, descripcionField, fechaCreacionPicker,
+                estadoComboBox, createButtonPanel()
         );
+    }
 
-        // Animación de focus
+    private VBox createStatsPanel() {
+        return components.createStatsPanel(statsLabel);
+    }
+
+    private HBox createButtonPanel() {
+        HBox buttonPanel = new HBox(12);
+        buttonPanel.setAlignment(Pos.CENTER_LEFT);
+        buttonPanel.getChildren().addAll(agregarBtn, actualizarBtn, eliminarBtn, limpiarBtn);
+        return buttonPanel;
+    }
+
+    private void createStatusBar() {
+        HBox statusBar = components.createStatusBar(statusLabel, statsLabel);
+        view.setBottom(statusBar);
+    }
+
+    private void setupLayout() {
+        // Panel izquierdo con tabla y estadísticas
+        VBox tableContainer = new VBox();
+        tableContainer.getChildren().addAll(toolbarBox, table, statsPanel);
+
+        leftPanel.getChildren().add(tableContainer);
+        leftPanel.setPrefWidth(800);
+
+        // Layout principal
+        HBox mainContent = new HBox(24);
+        mainContent.getChildren().addAll(leftPanel, rightPanel);
+        mainContent.setAlignment(Pos.TOP_CENTER);
+        mainContent.setPadding(new Insets(20));
+
+        view.setCenter(mainContent);
+
+        // Aplicar animaciones de entrada
+        Platform.runLater(() -> animations.playEntryAnimations(leftPanel, rightPanel));
+    }
+
+    private void setupEventHandlers() {
+        // Eventos de botones principales
+        agregarBtn.setOnAction(e -> agregarDepartamento());
+        actualizarBtn.setOnAction(e -> actualizarDepartamento());
+        eliminarBtn.setOnAction(e -> eliminarDepartamento());
+        limpiarBtn.setOnAction(e -> limpiarFormulario());
+
+        // Eventos de toolbar
+        refreshBtn.setOnAction(e -> refreshData());
+        exportBtn.setOnAction(e -> showExportDialog());
+        importBtn.setOnAction(e -> showImportDialog());
+        reportBtn.setOnAction(e -> showReportDialog());
+        configBtn.setOnAction(e -> showConfigDialog());
+
+        // Eventos de tabla
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            handleTableSelection(newVal);
+        });
+
+    }
+
+    private void setupFieldValidations() {
+        // Validación del nombre
+        nombreField.textProperty().addListener((obs, oldVal, newVal) -> {
+            validateNombreField(newVal);
+        });
+
+        // Efectos de focus
+        setupFocusEffects();
+    }
+
+    private void validateNombreField(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            components.setFieldValidationState(nombreField, "error");
+        } else if (text.trim().length() < 3) {
+            components.setFieldValidationState(nombreField, "warning");
+        } else {
+            components.setFieldValidationState(nombreField, "success");
+        }
+    }
+
+
+    private void setupFocusEffects() {
+        // Efectos visuales al enfocar campos
         nombreField.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                new RubberBand(nombreField).play();
-                nombreField.setStyle(nombreField.getStyle() + "-fx-border-color: #667eea; -fx-border-width: 2;");
-            } else {
-                nombreField.setStyle(nombreField.getStyle().replace("-fx-border-color: #667eea; -fx-border-width: 2;", ""));
+                animations.playFocusAnimation(nombreField);
             }
         });
 
-        descripcionField = new JFXTextArea();
-        descripcionField.setPromptText("Descripción del departamento");
-        descripcionField.setLabelFloat(true);
-        descripcionField.setWrapText(true);
-        descripcionField.setPrefRowCount(4);
-        descripcionField.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.9);" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-border-radius: 10;" +
-                        "-fx-font-size: 14;"
-        );
-
-        // Labels con iconos y efectos
-        Label nombreLabel = new Label("Nombre del Departamento");
-        nombreLabel.setGraphic(new FontIcon(FontAwesomeSolid.BUILDING));
-        nombreLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
-
-        Label descLabel = new Label("Descripción");
-        descLabel.setGraphic(new FontIcon(FontAwesomeSolid.ALIGN_LEFT));
-        descLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16;");
-
-        form.add(nombreLabel, 0, 0);
-        form.add(nombreField, 0, 1);
-        form.add(descLabel, 0, 2);
-        form.add(descripcionField, 0, 3);
+        descripcionField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                animations.playFocusAnimation(descripcionField);
+            }
+        });
     }
 
-    private void createEnhancedButtons() {
-        buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.setPadding(new Insets(20, 0, 0, 0));
-
-        // Botón Agregar - Verde vibrante
-        agregarBtn = createStylizedButton("Agregar", FontAwesomeSolid.PLUS, "#00E676");
-
-        // Botón Actualizar - Azul brillante
-        actualizarBtn = createStylizedButton("Actualizar", FontAwesomeSolid.EDIT, "#2196F3");
+    private void setupButtonStates() {
         actualizarBtn.setDisable(true);
-
-        // Botón Eliminar - Rojo vibrante
-        eliminarBtn = createStylizedButton("Eliminar", FontAwesomeSolid.TRASH_ALT, "#FF5252");
         eliminarBtn.setDisable(true);
-
-        // Botón Limpiar - Púrpura elegante
-        limpiarBtn = createStylizedButton("Limpiar", FontAwesomeSolid.BROOM, "#9C27B0");
-
-        buttonBox.getChildren().addAll(agregarBtn, actualizarBtn, eliminarBtn, limpiarBtn);
-        form.add(buttonBox, 0, 4);
     }
 
-    private JFXButton createStylizedButton(String text, FontAwesomeSolid icon, String color) {
-        JFXButton button = new JFXButton(text);
-        FontIcon fontIcon = new FontIcon(icon);
-        fontIcon.setIconSize(18);
-        fontIcon.setIconColor(Color.WHITE);
-        button.setGraphic(fontIcon);
-
-        button.setStyle(
-                "-fx-background-color: " + color + ";" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-font-size: 14;" +
-                        "-fx-background-radius: 25;" +
-                        "-fx-padding: 12 24 12 24;" +
-                        "-fx-cursor: hand;"
-        );
-
-        // Efectos hover espectaculares
-        button.setOnMouseEntered(e -> {
-            new Pulse(button).play();
-            button.setStyle(button.getStyle() +
-                    "-fx-effect: dropshadow(gaussian, " + color + ", 15, 0.5, 0, 0);" +
-                    "-fx-scale-x: 1.1; -fx-scale-y: 1.1;"
-            );
-        });
-
-        button.setOnMouseExited(e -> {
-            button.setStyle(button.getStyle().replaceAll("-fx-effect: [^;]+;", "").replaceAll("-fx-scale-[xy]: [^;]+;", ""));
-        });
-
-        // Animación de click
-        button.setOnMousePressed(e -> new Bounce(button).play());
-
-        return button;
+    private void setupTableBehavior() {
+        table.setItems(filteredDepartamentos);
+        table.setRowFactory(tv -> components.createTableRow(this::handleRowDoubleClick));
     }
 
-    private void setupMainLayout() {
-        // Panel izquierdo - Lista
-        Label titleLeft = new Label("📋 Departamentos Registrados");
-        titleLeft.setStyle(
-                "-fx-text-fill: white;" +
-                        "-fx-font-size: 20;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 0 0 15 0;"
-        );
-
-        leftPanel = new VBox(20);
-        leftPanel.getChildren().addAll(titleLeft, table);
-        leftPanel.setPrefWidth(450);
-        leftPanel.setPadding(new Insets(20));
-
-        // Efecto glassmorphism
-        leftPanel.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.1);" +
-                        "-fx-background-radius: 20;" +
-                        "-fx-border-color: rgba(255, 255, 255, 0.2);" +
-                        "-fx-border-width: 1;" +
-                        "-fx-border-radius: 20;"
-        );
-
-        // Panel derecho - Formulario
-        Label titleRight = new Label("⚙️ Gestión de Departamentos");
-        titleRight.setStyle(
-                "-fx-text-fill: white;" +
-                        "-fx-font-size: 20;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-padding: 0 0 20 0;"
-        );
-
-        rightPanel = new VBox(20);
-        rightPanel.getChildren().addAll(titleRight, form);
-        rightPanel.setPrefWidth(400);
-        rightPanel.setPadding(new Insets(20));
-
-        rightPanel.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.1);" +
-                        "-fx-background-radius: 20;" +
-                        "-fx-border-color: rgba(255, 255, 255, 0.2);" +
-                        "-fx-border-width: 1;" +
-                        "-fx-border-radius: 20;"
-        );
-
-        HBox mainContent = new HBox(30);
-        mainContent.getChildren().addAll(leftPanel, rightPanel);
-        mainContent.setAlignment(Pos.CENTER);
-        mainContent.setPadding(new Insets(40));
-
-        notificationPane.setContent(mainContent);
-        view.setCenter(notificationPane);
+    private void setupKeyboardShortcuts() {
+        view.setOnKeyPressed(e -> {
+            if (shortcuts[0].match(e)) agregarDepartamento();
+            else if (shortcuts[1].match(e) && !actualizarBtn.isDisable()) actualizarDepartamento();
+            else if (shortcuts[2].match(e) && !eliminarBtn.isDisable()) eliminarDepartamento();
+            else if (shortcuts[3].match(e)) limpiarFormulario();
+            else if (shortcuts[4].match(e)) refreshData();
+            else if (shortcuts[5].match(e)) searchField.requestFocus();
+            else if (shortcuts[6].match(e)) showExportDialog();
+            else if (shortcuts[7].match(e)) showImportDialog();
+        });
     }
 
-    private void setupAnimations() {
-        // Animación de entrada para paneles
-        new SlideInLeft(leftPanel).setDelay(Duration.millis(200)).play();
-        new SlideInRight(rightPanel).setDelay(Duration.millis(400)).play();
+    // Métodos de acción principales
+    private void agregarDepartamento() {
+        if (!validarFormulario()) return;
 
-        // Animación flotante continua para botones
-        Timeline floatingAnimation = new Timeline();
-        for (int i = 0; i < buttonBox.getChildren().size(); i++) {
-            final int index = i;
-            floatingAnimation.getKeyFrames().addAll(
-                    new KeyFrame(Duration.seconds(2 + index * 0.2),
-                            new KeyValue(buttonBox.getChildren().get(index).translateYProperty(), -5)
-                    ),
-                    new KeyFrame(Duration.seconds(4 + index * 0.2),
-                            new KeyValue(buttonBox.getChildren().get(index).translateYProperty(), 0)
-                    )
-            );
-        }
-        floatingAnimation.setCycleCount(Timeline.INDEFINITE);
-        floatingAnimation.play();
-    }
+        DepartamentoDTO dto = createDTOFromForm();
 
-    private void showNotification(String message, String type) {
-        // Crear el ícono según el tipo
-        FontIcon icon;
-        if ("success".equals(type)) {
-            icon = new FontIcon(FontAwesomeSolid.CHECK_CIRCLE);
-        } else if ("error".equals(type)) {
-            icon = new FontIcon(FontAwesomeSolid.EXCLAMATION_TRIANGLE);
-        } else {
-            icon = new FontIcon(FontAwesomeSolid.INFO_CIRCLE);
-        }
-        icon.setIconSize(24);
+        showLoadingState(true);
+        updateStatus("Agregando departamento...");
 
-        // Construir y mostrar la notificación
-        Notifications notification = Notifications.create()
-                .title(type.equals("success") ? "✔️ Éxito" : "⚠️ Aviso")
-                .text(message)
-                .graphic(icon)                        // <-- aquí tu .graphic(icon)
-                .hideAfter(Duration.seconds(3))
-                .position(Pos.TOP_RIGHT);
-
-        if ("success".equals(type)) {
-            notification.showInformation();
-        } else if ("error".equals(type)) {
-            notification.showError();
-        } else {
-            notification.showWarning();
-        }
-    }
-
-    private void loadData() {
-        try {
-            departamentos = FXCollections.observableArrayList(controller.obtenerTodosLosDepartamentos());
-            table.setItems(departamentos);
-
-            // Animación de carga
-            new FadeIn(table).play();
-
-        } catch (SQLException e) {
-            showNotification("Error al cargar departamentos", "error");
-            e.printStackTrace();
-        }
-    }
-
-    private void setupListeners() {
-        // Selección en la tabla con animaciones
-        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                // Animación de formulario
-                new FlipInX(form).play();
-
-                nombreField.setText(newSelection.getNombre());
-                descripcionField.setText(newSelection.getDescripcion());
-                actualizarBtn.setDisable(false);
-                eliminarBtn.setDisable(false);
-                agregarBtn.setDisable(true);
-
-                // Highlight de botones activos
-                new Tada(actualizarBtn).play();
-                new Tada(eliminarBtn).play();
-            }
-        });
-
-        // Botón limpiar con animación
-        limpiarBtn.setOnAction(e -> {
-            // 1) creas la animación
-            RotateOut rotOut = new RotateOut(form);
-            // 2) le asignas el callback
-            rotOut.setOnFinished(evt -> {
-                table.getSelectionModel().clearSelection();
-                clearForm();
-                new RotateIn(form).play();   // aquí RotateIn sí puede encadenar play()
-            });
-            // 3) la arrancas
-            rotOut.play();
-        });
-
-
-        // Botón agregar con efectos
-        agregarBtn.setOnAction(e -> {
-            try {
-                DepartamentoDTO nuevo = new DepartamentoDTO();
-                nuevo.setNombre(nombreField.getText());
-                nuevo.setDescripcion(descripcionField.getText());
-
-                controller.agregarDepartamento(nuevo);
-
-                // Animaciones de éxito
-                new Flash(agregarBtn).play();
-                loadData();
-                clearForm();
-                showNotification("¡Departamento agregado exitosamente! 🎉", "success");
-
-            } catch (IllegalArgumentException ex) {
-                showNotification("Error: " + ex.getMessage(), "error");
-                new Shake(form).play();
-            } catch (SQLException ex) {
-                showNotification("Error al agregar departamento", "error");
-                new Shake(form).play();
-                ex.printStackTrace();
-            }
-        });
-
-        // Botón actualizar con efectos
-        actualizarBtn.setOnAction(e -> {
-            DepartamentoDTO seleccionado = table.getSelectionModel().getSelectedItem();
-            if (seleccionado != null) {
-                try {
-                    seleccionado.setNombre(nombreField.getText());
-                    seleccionado.setDescripcion(descripcionField.getText());
-
-                    controller.actualizarDepartamento(seleccionado);
-
-                    new Flash(actualizarBtn).play();
-                    loadData();
-                    clearForm();
-                    showNotification("¡Departamento actualizado! ✨", "success");
-
-                } catch (IllegalArgumentException ex) {
-                    showNotification("Error: " + ex.getMessage(), "error");
-                    new Shake(form).play();
-                } catch (SQLException ex) {
-                    showNotification("Error al actualizar departamento", "error");
-                    new Shake(form).play();
-                    ex.printStackTrace();
-                }
-            }
-        });
-
-        // Botón eliminar con confirmación animada
-        eliminarBtn.setOnAction(e -> {
-            DepartamentoDTO seleccionado = table.getSelectionModel().getSelectedItem();
-            if (seleccionado != null) {
-                // Animación de alerta
-                new Wobble(eliminarBtn).play();
-
-                if (AlertUtils.showConfirmation("🗑️ Confirmar Eliminación",
-                        "¿Está seguro de eliminar el departamento '" + seleccionado.getNombre() + "'?\n\nEsta acción no se puede deshacer.")) {
-
-                    try {
-                        controller.eliminarDepartamento(seleccionado.getId());
-
-                        Hinge hinge = new Hinge(/* el nodo o condición que pasabas */);
-                        hinge.setOnFinished(evt -> {
-                            loadData();
-                            clearForm();
-                            showNotification("Departamento eliminado correctamente 🗑️", "success");
-                        });
-                        hinge.play();
+        CompletableFuture.supplyAsync(() -> {
+                    try (Connection connection = DatabaseManager.connect()) {
+                        DepartamentoDTO nuevo = controller.agregarDepartamento(dto);
+                        return nuevo; // Devuelve el departamento con ID generado
                     } catch (SQLException ex) {
-                        showNotification("Error al eliminar departamento", "error");
-                        new Shake(eliminarBtn).play();
-                        ex.printStackTrace();
+                        throw new RuntimeException("Error al agregar departamento", ex);
                     }
-                }
+                }, Executors.newCachedThreadPool())
+                .thenAccept(nuevoDepartamento -> {
+                    Platform.runLater(() -> {
+                        // Agrega directamente a la lista observable
+                        departamentos.add(nuevoDepartamento);
+                        filteredDepartamentos.setAll(departamentos);
+
+                        showLoadingState(false);
+                        updateStatus("Departamento agregado exitosamente");
+                        showSuccessNotification("Departamento agregado",
+                                "El departamento se ha registrado correctamente");
+                        limpiarFormulario();
+                        animations.playSuccessAnimation(agregarBtn);
+                        updateCountLabel();
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        showLoadingState(false);
+                        updateStatus("Error al agregar departamento");
+                        AlertUtils.showError("Error", "No se pudo agregar el departamento: " +
+                                ex.getCause().getMessage());
+                    });
+                    return null;
+                });
+    }
+
+    private void actualizarDepartamento() {
+        if (selectedDepartamento == null || !validarFormulario()) return;
+
+        updateDTOFromForm(selectedDepartamento);
+
+        showLoadingState(true);
+        updateStatus("Actualizando departamento...");
+
+        CompletableFuture.runAsync(() -> {
+                    try (Connection connection = DatabaseManager.connect()) {
+                        controller.actualizarDepartamento(selectedDepartamento);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException("Error al actualizar departamento", ex);
+                    }
+                }, Executors.newCachedThreadPool())
+                .thenRun(() -> {
+                    Platform.runLater(() -> {
+                        showLoadingState(false);
+                        updateStatus("Departamento actualizado exitosamente");
+                        showSuccessNotification("Departamento actualizado",
+                                "Los cambios se han guardado correctamente");
+                        limpiarFormulario();
+                        loadInitialData();
+                        animations.playSuccessAnimation(actualizarBtn);
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        showLoadingState(false);
+                        updateStatus("Error al actualizar departamento");
+                        AlertUtils.showError("Error", "No se pudo actualizar el departamento: " +
+                                ex.getCause().getMessage());
+                    });
+                    return null;
+                });
+    }
+
+    private void eliminarDepartamento() {
+        if (selectedDepartamento == null) return;
+        eliminarDepartamento(selectedDepartamento);
+    }
+
+    private void eliminarDepartamento(DepartamentoDTO departamento) {
+        boolean confirmado = AlertUtils.showConfirmation(
+                "Confirmar eliminación",
+                "¿Está seguro de que desea eliminar el departamento '" + departamento.getNombre() + "'?",
+                "Esta acción no se puede deshacer."
+        );
+
+        if (!confirmado) return;
+
+        showLoadingState(true);
+        updateStatus("Eliminando departamento...");
+
+        Supplier<Boolean> eliminarTask = () -> {
+            try {
+                controller.eliminarDepartamento(departamento.getId());
+                return true;
+            } catch (SQLException ex) {
+                throw new RuntimeException("Error al eliminar departamento", ex);
             }
+        };
+
+        CompletableFuture.supplyAsync(eliminarTask, Executors.newCachedThreadPool())
+                .thenAccept(result -> {
+                    Platform.runLater(() -> {
+                        showLoadingState(false);
+                        updateStatus("Departamento eliminado exitosamente");
+                        showSuccessNotification("Departamento eliminado",
+                                "El departamento se ha eliminado correctamente");
+                        limpiarFormulario();
+                        loadInitialData();
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        showLoadingState(false);
+                        updateStatus("Error al eliminar departamento");
+                        AlertUtils.showError("Error", "No se pudo eliminar el departamento: " +
+                                ex.getCause().getMessage());
+                    });
+                    return null;
+                });
+    }
+
+    private void duplicarDepartamento(DepartamentoDTO departamento) {
+        DepartamentoDTO duplicado = new DepartamentoDTO();
+        duplicado.setNombre(departamento.getNombre() + " (Copia)");
+        duplicado.setDescripcion(departamento.getDescripcion());
+        // Copiar otros campos...
+
+        fillFormFromDTO(duplicado);
+        isEditMode = false;
+        updateButtonStates();
+    }
+
+    // Métodos de diálogo
+    private void showExportDialog() {
+        Dialog<String> dialog = components.createExportDialog();
+        dialog.showAndWait().ifPresent(format -> {
+            exportData(format);
         });
     }
 
-    private void clearForm() {
+    private void showImportDialog() {
+        Dialog<File> dialog = components.createImportDialog();
+        dialog.showAndWait().ifPresent(file -> {
+            importData(file);
+        });
+    }
+
+    private void showReportDialog() {
+        Dialog<String> dialog = components.createReportDialog();
+        dialog.showAndWait().ifPresent(reportType -> {
+            generateReport(reportType);
+        });
+    }
+
+    private void showConfigDialog() {
+        Dialog<Void> dialog = components.createConfigDialog();
+        dialog.showAndWait();
+    }
+
+    // Métodos de exportación e importación
+    private void exportData(String format) {
+        showLoadingState(true);
+        updateStatus("Exportando datos...");
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                switch (format.toLowerCase()) {
+                    case "csv":
+                        return exportService.exportToCSV(departamentos);
+                    case "excel":
+                        return exportService.exportToExcel(departamentos);
+                    case "pdf":
+                        return exportService.exportToPDF(departamentos);
+                    case "json":
+                        return exportService.exportToJSON(departamentos);
+                    default:
+                        throw new IllegalArgumentException("Formato no soportado: " + format);
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }).thenAccept(file -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Datos exportados exitosamente");
+                showSuccessNotification("Exportación completada",
+                        "Los datos se han exportado a: " + file.getAbsolutePath());
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Error al exportar datos");
+                AlertUtils.showError("Error de exportación", ex.getMessage());
+            });
+            return null;
+        });
+    }
+
+    private void importData(File file) {
+        showLoadingState(true);
+        updateStatus("Importando datos...");
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return exportService.importFromFile(file);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }).thenAccept(importedData -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Datos importados exitosamente");
+                showSuccessNotification("Importación completada",
+                        "Se han importado " + importedData.size() + " registros");
+
+                // Agregar datos importados
+                departamentos.addAll(importedData);
+                filteredDepartamentos.setAll(departamentos);
+                updateCountLabel();
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Error al importar datos");
+                AlertUtils.showError("Error de importación", ex.getMessage());
+            });
+            return null;
+        });
+    }
+
+    private void generateReport(String reportType) {
+        showLoadingState(true);
+        updateStatus("Generando reporte...");
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return exportService.generateReport(departamentos, reportType);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }).thenAccept(reportFile -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Reporte generado exitosamente");
+                showSuccessNotification("Reporte completado",
+                        "El reporte se ha generado: " + reportFile.getAbsolutePath());
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Error al generar reporte");
+                AlertUtils.showError("Error de reporte", ex.getMessage());
+            });
+            return null;
+        });
+    }
+
+    // Métodos utilitarios
+    private void loadInitialData() {
+        showLoadingState(true);
+        updateStatus("Cargando departamentos...");
+
+        CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = DatabaseManager.connect()) {
+                return controller.obtenerTodosLosDepartamentos();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }).thenAccept(data -> {
+            Platform.runLater(() -> {
+                departamentos.clear();
+                departamentos.addAll(data);
+                filteredDepartamentos.setAll(data);
+
+                updateCountLabel();
+                updateStatus("Listo - " + data.size() + " departamentos cargados");
+                showLoadingState(false);
+
+                animations.playTableLoadAnimation(table);
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> {
+                showLoadingState(false);
+                updateStatus("Error al cargar datos");
+                AlertUtils.showError("Error de base de datos",
+                        "No se pudieron cargar los departamentos: " + ex.getMessage());
+            });
+            return null;
+        });
+    }
+
+    private void refreshData() {
+        animations.playRefreshAnimation(refreshBtn);
+        loadInitialData();
+    }
+
+    private void handleTableSelection(DepartamentoDTO departamento) {
+        selectedDepartamento = departamento;
+        boolean hasSelection = departamento != null;
+
+        actualizarBtn.setDisable(!hasSelection);
+        eliminarBtn.setDisable(!hasSelection);
+
+        if (hasSelection) {
+            fillFormFromDTO(departamento);
+            isEditMode = true;
+            animations.playSelectionAnimation(nombreField, descripcionField);
+        }
+    }
+
+    private void handleRowDoubleClick(DepartamentoDTO departamento) {
+        if (departamento != null) {
+            // Abrir ventana de detalles o edición avanzada
+            showDetailDialog(departamento);
+        }
+    }
+
+    private void showDetailDialog(DepartamentoDTO departamento) {
+        Dialog<Void> dialog = components.createDetailDialog(departamento);
+        dialog.showAndWait();
+    }
+
+    private DepartamentoDTO createDTOFromForm() {
+        DepartamentoDTO dto = new DepartamentoDTO();
+        dto.setNombre(nombreField.getText().trim());
+        dto.setDescripcion(descripcionField.getText().trim());
+        dto.setEstado(estadoComboBox.getValue());
+        dto.setFechaFromLocalDate(fechaCreacionPicker.getValue());
+        return dto;
+    }
+    private void updateDTOFromForm(DepartamentoDTO dto) {
+        dto.setNombre(nombreField.getText().trim());
+        dto.setDescripcion(descripcionField.getText().trim());
+           dto.setEstado( estadoComboBox.getValue() );
+           dto.setFecha( fechaCreacionPicker.getValue().atStartOfDay() );
+    }
+
+
+    private void fillFormFromDTO(DepartamentoDTO dto) {
+        nombreField.setText(dto.getNombre());
+        descripcionField.setText(dto.getDescripcion());
+        estadoComboBox.setValue(dto.getEstado());
+        fechaCreacionPicker.setValue(dto.getFechaAsLocalDate());
+    }
+
+    private void limpiarFormulario() {
         nombreField.clear();
         descripcionField.clear();
-        agregarBtn.setDisable(false);
-        actualizarBtn.setDisable(true);
-        eliminarBtn.setDisable(true);
+        estadoComboBox.setValue(null);
+        fechaCreacionPicker.setValue(LocalDate.now());
 
-        FadeOut fadeOut = new FadeOut(form);
-        fadeOut.setOnFinished(e -> {
-            // cuando termine el fade-out, haces el fade-in
-            new FadeIn(form).play();
-        });
-        fadeOut.play();    }
+        table.getSelectionModel().clearSelection();
+        selectedDepartamento = null;
+        isEditMode = false;
 
+        updateButtonStates();
+        animations.playClearAnimation(nombreField, descripcionField);
+        updateStatus("Formulario limpio");
+    }
 
+    private boolean validarFormulario() {
+        StringBuilder errores = new StringBuilder();
+        boolean esValido = true;
+
+        // Validación del nombre
+        if (nombreField.getText() == null || nombreField.getText().trim().isEmpty()) {
+            errores.append("• El nombre es obligatorio\n");
+            esValido = false;
+        } else if (nombreField.getText().trim().length() < 3) {
+            errores.append("• El nombre debe tener al menos 3 caracteres\n");
+            esValido = false;
+        }
+
+        // Validación de la fecha (aunque el listener ya maneja nulos)
+        if (fechaCreacionPicker.getValue() == null) {
+            fechaCreacionPicker.setValue(LocalDate.now());
+        }
+
+        if (!esValido) {
+            AlertUtils.showError("Datos inválidos", errores.toString());
+            return false;
+        }
+
+        return true;
+    }
+
+    private void updateButtonStates() {
+        actualizarBtn.setDisable(!isEditMode || selectedDepartamento == null);
+        eliminarBtn.setDisable(!isEditMode || selectedDepartamento == null);
+    }
+
+    private void showLoadingState(boolean loading) {
+        loadingIndicator.setVisible(loading);
+        agregarBtn.setDisable(loading);
+        actualizarBtn.setDisable(loading || selectedDepartamento == null);
+        eliminarBtn.setDisable(loading || selectedDepartamento == null);
+        refreshBtn.setDisable(loading);
+        exportBtn.setDisable(loading);
+        importBtn.setDisable(loading);
+    }
+
+    private void updateStatus(String message) {
+        statusLabel.setText(message);
+        animations.playStatusAnimation(statusLabel);
+    }
+
+    private void updateCountLabel() {
+        int total = departamentos.size();
+        int filtered = filteredDepartamentos.size();
+
+        if (total == filtered) {
+            countLabel.setText("Total: " + total);
+        } else {
+            countLabel.setText("Mostrando: " + filtered + " de " + total);
+        }
+    }
+    private void showSuccessNotification(String title, String message) {
+        Notifications.create()
+                .title(title)
+                .text(message)
+                .graphic(components.createIcon(FontAwesomeSolid.CHECK_CIRCLE, styles.SUCCESS_COLOR))
+                .hideAfter(Duration.seconds(4))
+                .position(Pos.TOP_RIGHT)
+                .show();
+    }
+
+    // Métodos públicos de la API
     public BorderPane getView() {
         return view;
+    }
+
+    public void focusSearch() {
+        searchField.requestFocus();
+    }
+
+    public void refresh() {
+        refreshData();
+    }
+
+    public void prepareForNewRecord() {
+        limpiarFormulario();
+        nombreField.requestFocus();
+    }
+
+    public void selectDepartamento(DepartamentoDTO departamento) {
+        table.getSelectionModel().select(departamento);
+        handleTableSelection(departamento);
     }
 }
